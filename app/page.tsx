@@ -4,8 +4,8 @@ export default function Dashboard() {
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       {/* Header */}
-      <header className="flex justify-between items-center p-8 bg-white dark:bg-gray-800 shadow-md">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+      <header className="flex justify-between items-center p-6 bg-blue-600 dark:bg-blue-800 text-white shadow-md">
+        <h1 className="text-2xl font-semibold">Lista cu examenele profesorului</h1>
         <div className="flex items-center gap-4">
           <Image
             src="https://nextjs.org/icons/next.svg"
@@ -19,50 +19,55 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="p-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Quick Stats */}
-        <section className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col items-center">
-          <h2 className="text-xl font-semibold mb-2">Exams Scheduled</h2>
-          <p className="text-4xl font-bold">5</p>
-          <p className="text-sm text-gray-500">Next in 2 days</p>
+      <main className="p-8 grid gap-8">
+        {/* Filters */}
+        <div className="flex gap-4 mb-4">
+          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Selectează profesor</button>
+          <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Alege săptămâna</button>
+        </div>
+
+        {/* Exam Table */}
+        <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-center">Tabelul cu orele și examenele</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-gray-200 dark:bg-gray-700">
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Ora</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Luni</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Marți</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Miercuri</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Joi</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Vineri</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Sâmbătă</th>
+                  <th className="p-2 border border-gray-300 dark:border-gray-600">Duminică</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 10 }, (_, i) => (
+                  <tr key={i} className="even:bg-gray-100 dark:even:bg-gray-700">
+                    <td className="p-2 border border-gray-300 dark:border-gray-600">
+                      {`${9 + i}-${10 + i}`}
+                    </td>
+                    {Array.from({ length: 7 }, (_, j) => (
+                      <td key={j} className="p-2 border border-gray-300 dark:border-gray-600">
+                        {/* Placeholder for exam info */}
+                        <div className="w-full h-6 bg-gray-200 dark:bg-gray-600 rounded-lg"></div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
-        <section className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col items-center">
-          <h2 className="text-xl font-semibold mb-2">Assignments Due</h2>
-          <p className="text-4xl font-bold">3</p>
-          <p className="text-sm text-gray-500">Due in 1 week</p>
-        </section>
-
-        <section className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col items-center">
-          <h2 className="text-xl font-semibold mb-2">Study Hours Logged</h2>
-          <p className="text-4xl font-bold">12</p>
-          <p className="text-sm text-gray-500">This Week</p>
-        </section>
-
-        {/* Links */}
-        <section className="col-span-full grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <a
-            href="#"
-            className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-          >
-            <h3 className="text-lg font-medium mb-2">View Exam Schedule</h3>
-            <p className="text-sm text-gray-500">Check upcoming exams and schedules</p>
-          </a>
-          <a
-            href="#"
-            className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-          >
-            <h3 className="text-lg font-medium mb-2">Add New Exam</h3>
-            <p className="text-sm text-gray-500">Plan and add new exams to your schedule</p>
-          </a>
-          <a
-            href="#"
-            className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-          >
-            <h3 className="text-lg font-medium mb-2">Track Study Time</h3>
-            <p className="text-sm text-gray-500">Log and manage study hours</p>
-          </a>
-        </section>
+        {/* Schedule Exam Button */}
+        <div className="flex justify-center mt-6">
+          <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+            Programează examen
+          </button>
+        </div>
       </main>
 
       {/* Footer */}
