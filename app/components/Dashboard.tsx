@@ -6,7 +6,7 @@ export default function Dashboard() {
   const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
 
   return (
-    <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       {/* Navbar */}
       <Navbar />
 
@@ -110,7 +110,7 @@ export default function Dashboard() {
         <div className="flex justify-center mt-8">
           <Link
             href="/exam-schedule"
-            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+            className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
             Programează examen
           </Link>
