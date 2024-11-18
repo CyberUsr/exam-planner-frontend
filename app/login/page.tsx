@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -9,13 +10,22 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
 
+  // Store the user role
+  const [userRole, setUserRole] = useState("");
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check hardcoded credentials
-    if (email === "admin@gmail.com" && password === "admin") {
-      console.log("Login successful!");
-      router.push("/dashboard"); // Redirect to the main page
+    // Hardcoded credentials
+    if (email === "elena@usm.ro" && password === "admin") {
+      setUserRole("teacher");
+      router.push("/dashboard");
+    } else if (
+      email === "petrica.ionescu@student.usv.ro" &&
+      password === "admin"
+    ) {
+      setUserRole("student");
+      router.push("/dashboard");
     } else {
       setErrorMessage("Invalid email or password.");
     }
