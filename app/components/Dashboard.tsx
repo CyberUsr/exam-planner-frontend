@@ -73,21 +73,29 @@ export default function Dashboard() {
                   <th className="p-3 border border-gray-300 dark:border-gray-600">
                     Ora
                   </th>
-                  {["Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă"].map(
-                    (day) => (
-                      <th
-                        key={day}
-                        className="p-3 border border-gray-300 dark:border-gray-600"
-                      >
-                        {day}
-                      </th>
-                    )
-                  )}
+                  {[
+                    "Luni",
+                    "Marți",
+                    "Miercuri",
+                    "Joi",
+                    "Vineri",
+                    "Sâmbătă",
+                  ].map((day) => (
+                    <th
+                      key={day}
+                      className="p-3 border border-gray-300 dark:border-gray-600"
+                    >
+                      {day}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {Array.from({ length: 11 }, (_, i) => (
-                  <tr key={i} className="even:bg-gray-100 dark:even:bg-gray-700">
+                  <tr
+                    key={i}
+                    className="even:bg-gray-100 dark:even:bg-gray-700"
+                  >
                     <td className="p-3 border border-gray-300 dark:border-gray-600">
                       {`${8 + i}-${10 + i}`}
                     </td>
@@ -109,7 +117,7 @@ export default function Dashboard() {
         {/* Schedule Exam Button */}
         <div className="flex justify-center mt-8">
           <Link
-            href="/exam-schedule"
+            href="/programare-examene"
             className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
             Programează examen
