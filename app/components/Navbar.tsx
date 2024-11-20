@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -104,10 +105,10 @@ export default function Navbar() {
                     </li>
                     <li>
                       <Link
-                        href="/settings"
+                        href="/cereri"
                         className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
                       >
-                        Settings
+                        Cereri
                       </Link>
                     </li>
                     <li>
