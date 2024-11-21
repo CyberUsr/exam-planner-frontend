@@ -1,9 +1,33 @@
+"use client";
 import Link from "next/link";
 import Navbar from "./Navbar";
+import { useEffect, useState } from "react";
+import { getAllProfesori } from "../services/profesoriService"; // Import the service function
+
+// Define the interface for a professor
+interface Professor {
+  id_profesor: string;
+  nume: string;
+  prenume: string;
+}
 
 export default function Dashboard() {
-  const professors = ["Profesor A", "Profesor B", "Profesor C"];
+  const [professors, setProfessors] = useState<Professor[]>([]); // Typed state for professors
   const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
+
+  useEffect(() => {
+    // Fetch professors on component mount
+    const fetchProfessors = async () => {
+      try {
+        const data = await getAllProfesori();
+        setProfessors(data); // Update state with fetched professors
+      } catch (error) {
+        console.error("Error fetching professors:", error);
+      }
+    };
+
+    fetchProfessors();
+  }, []);
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
@@ -29,9 +53,12 @@ export default function Dashboard() {
               <option disabled selected>
                 Alege un profesor
               </option>
-              {professors.map((professor, index) => (
-                <option key={index} value={professor}>
-                  {professor}
+              {professors.map((professor) => (
+                <option
+                  key={professor.id_profesor}
+                  value={professor.id_profesor}
+                >
+                  {`${professor.nume} ${professor.prenume}`}
                 </option>
               ))}
             </select>
