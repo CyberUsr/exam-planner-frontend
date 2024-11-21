@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { loginUser } from "../services/loginService"; // Import the loginUser function
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,21 +14,33 @@ export default function LoginPage() {
   // Store the user role
   const [userRole, setUserRole] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Hardcoded credentials
-    if (email === "elena@usm.ro" && password === "admin") {
-      setUserRole("teacher");
-      router.push("/dashboard");
-    } else if (
-      email === "petrica.ionescu@student.usv.ro" &&
-      password === "admin"
-    ) {
-      setUserRole("student");
-      router.push("/dashboard");
-    } else {
-      setErrorMessage("Invalid email or password.");
+    try {
+      // Call the loginUser function
+      const response = await loginUser(email, password);
+
+      // Assuming the response contains a token and role
+      const { token, role } = response;
+
+      // Save the token for future API calls
+      localStorage.setItem("token", token);
+
+      // Set the user role
+      setUserRole(role);
+
+      // Redirect to the appropriate dashboard
+      if (role === "teacher") {
+        router.push("/dashboard/teacher");
+      } else if (role === "student") {
+        router.push("/dashboard/student");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      // Handle error response
+     //
     }
   };
 
