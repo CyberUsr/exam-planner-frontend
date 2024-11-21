@@ -47,17 +47,26 @@ export default function ScheduleExam() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
-        <header className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+        {/* Header */}
+        <header className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
             Schedule an Exam
           </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Fill out the details below to schedule an exam.
+          </p>
         </header>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="nume_materie" className="block text-sm font-medium">
+          {/* Subject */}
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="nume_materie"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Subject
             </label>
             <input
@@ -67,12 +76,17 @@ export default function ScheduleExam() {
               value={formData.nume_materie}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded"
+              placeholder="Enter the subject"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 
-          <div>
-            <label htmlFor="data" className="block text-sm font-medium">
+          {/* Date */}
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="data"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Date
             </label>
             <input
@@ -82,12 +96,16 @@ export default function ScheduleExam() {
               value={formData.data}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 
-          <div>
-            <label htmlFor="ora" className="block text-sm font-medium">
+          {/* Time */}
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="ora"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Time
             </label>
             <input
@@ -97,12 +115,16 @@ export default function ScheduleExam() {
               value={formData.ora}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>
 
-          <div>
-            <label htmlFor="tip_evaluare" className="block text-sm font-medium">
+          {/* Exam Type */}
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="tip_evaluare"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               Exam Type
             </label>
             <select
@@ -111,7 +133,7 @@ export default function ScheduleExam() {
               value={formData.tip_evaluare}
               onChange={handleChange}
               required
-              className="w-full p-3 border rounded"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <option value="" disabled>
                 Select an exam type
@@ -122,12 +144,15 @@ export default function ScheduleExam() {
             </select>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded"
-          >
-            Schedule Exam
-          </button>
+          {/* Submit Button */}
+          <div className="text-center">
+            <button
+              type="submit"
+              className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none"
+            >
+              Schedule Exam
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -2,18 +2,30 @@
 import Link from "next/link";
 import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
-import { getAllProfesori } from "../services/profesoriService"; // Import the service function
+import { getAllProfesori } from "../services/profesoriService";
+import { getAllExamene } from "../services/exameneService";
 
-// Define the interface for a professor
+// Define the interfaces for professors and exams
 interface Professor {
   id_profesor: string;
   nume: string;
   prenume: string;
 }
 
+interface Exam {
+  id_examene: string;
+  nume_materie: string;
+  data: string; // ISO string date
+  ora: string; // ISO string date
+  tip_evaluare: string;
+  actualizatDe: string;
+}
+
 export default function Dashboard() {
   const [professors, setProfessors] = useState<Professor[]>([]); // Typed state for professors
+  const [exams, setExams] = useState<Exam[]>([]); // Typed state for exams
   const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
+  const [selectedWeek, setSelectedWeek] = useState<string>("Săptămâna 1");
 
   useEffect(() => {
     // Fetch professors on component mount
@@ -26,8 +38,41 @@ export default function Dashboard() {
       }
     };
 
+    // Fetch exams on component mount
+    const fetchExams = async () => {
+      try {
+        const data = await getAllExamene();
+        setExams(data); // Update state with fetched exams
+      } catch (error) {
+        console.error("Error fetching exams:", error);
+      }
+    };
+
     fetchProfessors();
+    fetchExams();
   }, []);
+
+  // Map weekdays to corresponding string
+  const weekdayMap = {
+    luni: 1,
+    marți: 2,
+    miercuri: 3,
+    joi: 4,
+    vineri: 5,
+    sâmbătă: 6,
+  } as const;
+
+  // Filter exams for a specific day and time slot
+  const getExamsForSlot = (day: keyof typeof weekdayMap, timeSlot: string) => {
+    return exams.filter((exam) => {
+      const examDate = new Date(exam.data);
+      const examDay = examDate.getDay(); // Get day as number (0=Sunday, 1=Monday, etc.)
+      const examTime = `${examDate.getHours()}-${examDate.getHours() + 2}`;
+
+      // Match the day and time slot
+      return examDay === weekdayMap[day] && examTime === timeSlot;
+    });
+  };
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
@@ -74,11 +119,10 @@ export default function Dashboard() {
             </label>
             <select
               id="week"
+              value={selectedWeek}
+              onChange={(e) => setSelectedWeek(e.target.value)}
               className="block w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-400"
             >
-              <option disabled selected>
-                Alege o săptămână
-              </option>
               {weeks.map((week, index) => (
                 <option key={index} value={week}>
                   {week}
@@ -88,10 +132,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Exam Table */}
+        {/* Weekly Calendar */}
         <section className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-100">
-            Tabelul cu orele și examenele
+            Calendar săptămânal
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-center border-collapse text-sm sm:text-base">
@@ -100,14 +144,7 @@ export default function Dashboard() {
                   <th className="p-3 border border-gray-300 dark:border-gray-600">
                     Ora
                   </th>
-                  {[
-                    "Luni",
-                    "Marți",
-                    "Miercuri",
-                    "Joi",
-                    "Vineri",
-                    "Sâmbătă",
-                  ].map((day) => (
+                  {Object.keys(weekdayMap).map((day) => (
                     <th
                       key={day}
                       className="p-3 border border-gray-300 dark:border-gray-600"
@@ -118,36 +155,49 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: 11 }, (_, i) => (
-                  <tr
-                    key={i}
-                    className="even:bg-gray-100 dark:even:bg-gray-700"
-                  >
-                    <td className="p-3 border border-gray-300 dark:border-gray-600">
-                      {`${8 + i}-${10 + i}`}
-                    </td>
-                    {Array.from({ length: 6 }, (_, j) => (
-                      <td
-                        key={j}
-                        className="p-3 border border-gray-300 dark:border-gray-600"
-                      >
-                        <div className="w-full h-6 bg-gray-200 dark:bg-gray-600 rounded-md"></div>
+                {Array.from({ length: 11 }, (_, i) => {
+                  const timeSlot = `${8 + i}-${10 + i}`;
+                  return (
+                    <tr
+                      key={i}
+                      className="even:bg-gray-100 dark:even:bg-gray-700"
+                    >
+                      <td className="p-3 border border-gray-300 dark:border-gray-600">
+                        {timeSlot}
                       </td>
-                    ))}
-                  </tr>
-                ))}
+                      {Object.keys(weekdayMap).map((day) => (
+                        <td
+                          key={day}
+                          className="p-3 border border-gray-300 dark:border-gray-600"
+                        >
+                          {getExamsForSlot(
+                            day as keyof typeof weekdayMap,
+                            timeSlot
+                          ).map((exam) => (
+                            <div
+                              key={exam.id_examene}
+                              className="p-2 bg-blue-500 text-white rounded mb-2"
+                            >
+                              {exam.nume_materie}
+                            </div>
+                          ))}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </section>
 
-        {/* Schedule Exam Button */}
+        {/* Add Exam Button */}
         <div className="flex justify-center mt-8">
           <Link
-            href="/programare-examene"
+            href="/adaugare-examene"
             className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
-            Programează examen
+            Adaugă examen
           </Link>
         </div>
       </main>
