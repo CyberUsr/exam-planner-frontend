@@ -23,7 +23,9 @@ interface Exam {
 
 export default function Dashboard() {
   const [professors, setProfessors] = useState<Professor[]>([]);
+  const [filteredProfessors, setFilteredProfessors] = useState<Professor[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
+  const [searchQuery, setSearchQuery] = useState(""); // For searching professors
   const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
   const [selectedWeek, setSelectedWeek] = useState<string>("Săptămâna 1");
 
@@ -32,6 +34,7 @@ export default function Dashboard() {
       try {
         const data = await getAllProfesori();
         setProfessors(data);
+        setFilteredProfessors(data); // Initialize filtered list
       } catch (error) {
         console.error("Error fetching professors:", error);
       }
@@ -69,6 +72,17 @@ export default function Dashboard() {
     });
   };
 
+  // Filter professors based on search query
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    const filtered = professors.filter((professor) =>
+      `${professor.nume} ${professor.prenume}`
+        .toLowerCase()
+        .includes(query.toLowerCase())
+    );
+    setFilteredProfessors(filtered);
+  };
+
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <Navbar />
@@ -76,30 +90,22 @@ export default function Dashboard() {
       <main className="p-4 sm:p-6 md:p-10 grid gap-8">
         {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          {/* Select Professor */}
+          {/* Search Professor */}
           <div className="w-full lg:w-1/2">
             <label
-              htmlFor="professor"
+              htmlFor="professor-search"
               className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2"
             >
-              Selectează profesor
+              Search Professor
             </label>
-            <select
-              id="professor"
+            <input
+              id="professor-search"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Type a professor's name"
               className="block w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-400"
-            >
-              <option disabled selected>
-                Alege un profesor
-              </option>
-              {professors.map((professor) => (
-                <option
-                  key={professor.id_profesor}
-                  value={professor.id_profesor}
-                >
-                  {`${professor.nume} ${professor.prenume}`}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* Select Week */}
@@ -123,6 +129,29 @@ export default function Dashboard() {
               ))}
             </select>
           </div>
+        </div>
+
+        {/* Professors Dropdown */}
+        <div className="w-full lg:w-1/2">
+          <label
+            htmlFor="professor"
+            className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2"
+          >
+            Selectează profesor
+          </label>
+          <select
+            id="professor"
+            className="block w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-400"
+          >
+            <option disabled selected>
+              Alege un profesor
+            </option>
+            {filteredProfessors.map((professor) => (
+              <option key={professor.id_profesor} value={professor.id_profesor}>
+                {`${professor.nume} ${professor.prenume}`}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Weekly Calendar */}
