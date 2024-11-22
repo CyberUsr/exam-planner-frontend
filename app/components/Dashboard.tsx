@@ -73,8 +73,10 @@ export default function Dashboard() {
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <Navbar />
 
-      <main className="p-6 sm:p-10 grid gap-8">
+      <main className="p-4 sm:p-6 md:p-10 grid gap-8">
+        {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          {/* Select Professor */}
           <div className="w-full lg:w-1/2">
             <label
               htmlFor="professor"
@@ -100,6 +102,7 @@ export default function Dashboard() {
             </select>
           </div>
 
+          {/* Select Week */}
           <div className="w-full lg:w-1/2">
             <label
               htmlFor="week"
@@ -122,65 +125,69 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Weekly Calendar */}
         <section className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-100">
             Calendar săptămânal
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-center border-collapse text-sm sm:text-base">
-              <thead>
-                <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                  <th className="p-3 border border-gray-300 dark:border-gray-600">
-                    Ora
-                  </th>
-                  {Object.keys(weekdayMap).map((day) => (
-                    <th
-                      key={day}
-                      className="p-3 border border-gray-300 dark:border-gray-600"
-                    >
-                      {day}
+            <div className="min-w-[800px]">
+              <table className="w-full text-center border-collapse text-sm sm:text-base">
+                <thead>
+                  <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <th className="p-3 border border-gray-300 dark:border-gray-600">
+                      Ora
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 11 }, (_, i) => {
-                  const timeSlot = `${8 + i}-${10 + i}`;
-                  return (
-                    <tr
-                      key={i}
-                      className="even:bg-gray-100 dark:even:bg-gray-700"
-                    >
-                      <td className="p-3 border border-gray-300 dark:border-gray-600">
-                        {timeSlot}
-                      </td>
-                      {Object.keys(weekdayMap).map((day) => (
-                        <td
-                          key={day}
-                          className="p-3 border border-gray-300 dark:border-gray-600"
-                        >
-                          {getExamsForSlot(
-                            day as keyof typeof weekdayMap,
-                            timeSlot
-                          ).map((exam) => (
-                            <Link
-                              key={exam.id_examene}
-                              href={`/examene/${exam.id_examene}`}
-                              className="block p-2 bg-blue-500 text-white rounded mb-2"
-                            >
-                              {exam.nume_materie}
-                            </Link>
-                          ))}
+                    {Object.keys(weekdayMap).map((day) => (
+                      <th
+                        key={day}
+                        className="p-3 border border-gray-300 dark:border-gray-600"
+                      >
+                        {day}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 11 }, (_, i) => {
+                    const timeSlot = `${8 + i}-${10 + i}`;
+                    return (
+                      <tr
+                        key={i}
+                        className="even:bg-gray-100 dark:even:bg-gray-700"
+                      >
+                        <td className="p-3 border border-gray-300 dark:border-gray-600">
+                          {timeSlot}
                         </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        {Object.keys(weekdayMap).map((day) => (
+                          <td
+                            key={day}
+                            className="p-3 border border-gray-300 dark:border-gray-600"
+                          >
+                            {getExamsForSlot(
+                              day as keyof typeof weekdayMap,
+                              timeSlot
+                            ).map((exam) => (
+                              <Link
+                                key={exam.id_examene}
+                                href={`/examene/${exam.id_examene}`}
+                                className="block p-2 bg-blue-500 text-white rounded mb-2"
+                              >
+                                {exam.nume_materie}
+                              </Link>
+                            ))}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
+        {/* Add Exam Button */}
         <div className="flex justify-center mt-8">
           <Link
             href="/adaugare-examene"
@@ -191,6 +198,7 @@ export default function Dashboard() {
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="p-6 bg-gray-200 dark:bg-gray-800 text-center text-sm text-gray-700 dark:text-gray-300">
         © 2024 Exam Planner. All rights reserved.
       </footer>
