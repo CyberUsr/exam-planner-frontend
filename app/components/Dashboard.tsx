@@ -1,11 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
 import { getAllProfesori } from "../services/profesoriService";
 import { getAllExamene } from "../services/exameneService";
 
-// Define the interfaces for professors and exams
 interface Professor {
   id_profesor: string;
   nume: string;
@@ -22,27 +22,25 @@ interface Exam {
 }
 
 export default function Dashboard() {
-  const [professors, setProfessors] = useState<Professor[]>([]); // Typed state for professors
-  const [exams, setExams] = useState<Exam[]>([]); // Typed state for exams
+  const [professors, setProfessors] = useState<Professor[]>([]);
+  const [exams, setExams] = useState<Exam[]>([]);
   const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
   const [selectedWeek, setSelectedWeek] = useState<string>("Săptămâna 1");
 
   useEffect(() => {
-    // Fetch professors on component mount
     const fetchProfessors = async () => {
       try {
         const data = await getAllProfesori();
-        setProfessors(data); // Update state with fetched professors
+        setProfessors(data);
       } catch (error) {
         console.error("Error fetching professors:", error);
       }
     };
 
-    // Fetch exams on component mount
     const fetchExams = async () => {
       try {
         const data = await getAllExamene();
-        setExams(data); // Update state with fetched exams
+        setExams(data);
       } catch (error) {
         console.error("Error fetching exams:", error);
       }
@@ -52,7 +50,6 @@ export default function Dashboard() {
     fetchExams();
   }, []);
 
-  // Map weekdays to corresponding string
   const weekdayMap = {
     luni: 1,
     marți: 2,
@@ -62,28 +59,22 @@ export default function Dashboard() {
     sâmbătă: 6,
   } as const;
 
-  // Filter exams for a specific day and time slot
   const getExamsForSlot = (day: keyof typeof weekdayMap, timeSlot: string) => {
     return exams.filter((exam) => {
       const examDate = new Date(exam.data);
-      const examDay = examDate.getDay(); // Get day as number (0=Sunday, 1=Monday, etc.)
+      const examDay = examDate.getDay();
       const examTime = `${examDate.getHours()}-${examDate.getHours() + 2}`;
 
-      // Match the day and time slot
       return examDay === weekdayMap[day] && examTime === timeSlot;
     });
   };
 
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Main Content */}
       <main className="p-6 sm:p-10 grid gap-8">
-        {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          {/* Dropdown for Selectează Profesor */}
           <div className="w-full lg:w-1/2">
             <label
               htmlFor="professor"
@@ -109,7 +100,6 @@ export default function Dashboard() {
             </select>
           </div>
 
-          {/* Dropdown for Alege Săptămâna */}
           <div className="w-full lg:w-1/2">
             <label
               htmlFor="week"
@@ -132,7 +122,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Weekly Calendar */}
         <section className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-100">
             Calendar săptămânal
@@ -174,12 +163,13 @@ export default function Dashboard() {
                             day as keyof typeof weekdayMap,
                             timeSlot
                           ).map((exam) => (
-                            <div
+                            <Link
                               key={exam.id_examene}
-                              className="p-2 bg-blue-500 text-white rounded mb-2"
+                              href={`/examene/${exam.id_examene}`}
+                              className="block p-2 bg-blue-500 text-white rounded mb-2"
                             >
                               {exam.nume_materie}
-                            </div>
+                            </Link>
                           ))}
                         </td>
                       ))}
@@ -191,7 +181,6 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Add Exam Button */}
         <div className="flex justify-center mt-8">
           <Link
             href="/adaugare-examene"
@@ -202,7 +191,6 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="p-6 bg-gray-200 dark:bg-gray-800 text-center text-sm text-gray-700 dark:text-gray-300">
         © 2024 Exam Planner. All rights reserved.
       </footer>

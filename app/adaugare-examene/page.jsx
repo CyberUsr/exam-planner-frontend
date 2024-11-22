@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation"; // Updated import for `app` directory
 import { createExam } from "../services/exameneService";
 
 export default function ScheduleExam() {
@@ -11,6 +12,8 @@ export default function ScheduleExam() {
     tip_evaluare: "",
     actualizatDe: "teacher", // Replace with logged-in teacher's name or ID
   });
+  const [showToast, setShowToast] = useState(false);
+  const router = useRouter(); // Using `next/navigation` for app directory
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,24 +33,20 @@ export default function ScheduleExam() {
       };
 
       await createExam(formattedData);
-      alert("Exam scheduled successfully!");
 
-      // Reset the form
-      setFormData({
-        nume_materie: "",
-        data: "",
-        ora: "",
-        tip_evaluare: "",
-        actualizatDe: "teacher",
-      });
+      // Show the toast for a few seconds, then redirect
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        router.back(); // Navigate back to the previous page
+      }, 3000);
     } catch (error) {
-      alert("Failed to schedule exam.");
-      console.error(error);
+      console.error("Failed to schedule exam:", error);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center p-6 relative">
       <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
         {/* Header */}
         <header className="text-center mb-8">
@@ -155,6 +154,34 @@ export default function ScheduleExam() {
           </div>
         </form>
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div
+          id="toast-simple"
+          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-x divide-gray-200 rounded-lg shadow dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800"
+          role="alert"
+        >
+          <svg
+            className="w-5 h-5 text-blue-600 dark:text-blue-500 rotate-45"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 18 20"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="m9 17 8 2L9 1 1 19l8-2Zm0 0V9"
+            />
+          </svg>
+          <div className="ps-4 text-sm font-normal">
+            Exam scheduled successfully! Redirecting...
+          </div>
+        </div>
+      )}
     </div>
   );
 }

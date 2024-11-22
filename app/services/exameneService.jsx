@@ -16,6 +16,20 @@ export const getAllExamene = async () => {
   }
 };
 
+// Fetch a single exam by ID
+export const getExamById = async (id_exam) => {
+  try {
+    const response = await axios.get(`${API_URL}/${id_exam}`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching exam:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to fetch exam.");
+  }
+};
+
 // Create a new exam
 export const createExam = async (data) => {
   try {
@@ -27,5 +41,33 @@ export const createExam = async (data) => {
       error.response?.data || error.message
     );
     throw new Error("Failed to create exam.");
+  }
+};
+
+// Update an exam
+export const updateExam = async (id_exam, data) => {
+  try {
+    const response = await axios.put(`${API_URL}/${id_exam}`, data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error updating exam:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to update exam.");
+  }
+};
+
+// Delete an exam
+export const deleteExam = async (id_exam) => {
+  try {
+    const response = await axios.delete(`${API_URL}/${id_exam}`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error deleting exam:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to delete exam.");
   }
 };
