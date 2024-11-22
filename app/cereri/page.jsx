@@ -5,9 +5,11 @@ import {
   deleteCerere,
   createCerere,
 } from "../services/cereriService";
+import { getAllExameneSali } from "../services/exameneSaliService";
 
 export default function CereriPage() {
   const [cereri, setCereri] = useState([]);
+  const [exameneSali, setExameneSali] = useState([]); // State for Examene Sali dropdown
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newCerere, setNewCerere] = useState({
@@ -27,6 +29,16 @@ export default function CereriPage() {
       setError("Failed to load cereri.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchExameneSali = async () => {
+    try {
+      const data = await getAllExameneSali();
+      setExameneSali(data);
+    } catch (err) {
+      console.error("Error fetching Examene Sali:", err);
+      setError("Failed to load Examene Sali.");
     }
   };
 
@@ -76,6 +88,7 @@ export default function CereriPage() {
 
   useEffect(() => {
     fetchCereri();
+    fetchExameneSali(); // Fetch Examene Sali for dropdown
   }, []);
 
   if (loading) {
@@ -99,15 +112,25 @@ export default function CereriPage() {
             required
             className="border p-2 rounded"
           />
-          <input
-            type="text"
+          <select
             name="id_examene_sali"
             value={newCerere.id_examene_sali}
             onChange={handleInputChange}
-            placeholder="Examen Sala ID"
             required
             className="border p-2 rounded"
-          />
+          >
+            <option value="" disabled>
+              Select Examen Sala
+            </option>
+            {exameneSali.map((examenSala) => (
+              <option
+                key={examenSala.id_examene_sali}
+                value={examenSala.id_examene_sali}
+              >
+                {`${examenSala.examene?.nume_materie} - ${examenSala.sala?.nume}`}
+              </option>
+            ))}
+          </select>
           <input
             type="date"
             name="data"
