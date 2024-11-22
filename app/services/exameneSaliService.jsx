@@ -30,7 +30,11 @@ export const getExameneSaliById = async (id_examene_sali) => {
 // Create a new ExameneSali record
 export const createExameneSali = async (data) => {
   try {
-    const response = await axios.post(API_URL, data);
+    const { id_examene, id_sala } = data; // Exclude id_examene_sali
+    const response = await axios.post("http://localhost:3003/examenesali", {
+      id_examene,
+      id_sala,
+    });
     return response.data;
   } catch (error) {
     console.error("Error creating ExameneSali record:", error);
