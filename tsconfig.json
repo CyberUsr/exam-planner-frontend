@@ -26,7 +26,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/campusMap/page.jsx"
+    "app/campusMap/page.jsx",
+    "app/login/page.jsx",
+    "app/register/page.jsx"
   ],
   "exclude": ["node_modules"]
 }
