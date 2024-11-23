@@ -28,7 +28,8 @@
     ".next/types/**/*.ts",
     "app/campusMap/page.jsx",
     "app/login/page.jsx",
-    "app/register/page.jsx"
+    "app/register/page.jsx",
+    "app/components/ManageExams.jsx"
   ],
   "exclude": ["node_modules"]
 }
