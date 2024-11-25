@@ -243,6 +243,15 @@ export default function Dashboard() {
             Manage Sali
           </Link>
         </div>
+
+        <div className="flex justify-center mt-8">
+          <Link
+            href="/teacher-cereri"
+            className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          >
+            Manage Cereri
+          </Link>
+        </div>
       </main>
 
       {/* Footer */}
