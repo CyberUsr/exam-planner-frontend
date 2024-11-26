@@ -1,0 +1,166 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getAllCereri, updateCerere } from "../services/cereriService";
+
+export default function TeacherCereriPage() {
+  const [cereri, setCereri] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [comment, setComment] = useState(""); // State for adding comments
+  const [selectedCerereId, setSelectedCerereId] = useState(null); // To track selected cerere for comment
+
+  const fetchCereri = async () => {
+    setLoading(true);
+    try {
+      const data = await getAllCereri();
+      setCereri(data);
+    } catch (err) {
+      console.error("Error fetching cereri:", err);
+      setError("Failed to load cereri.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApprove = async (id) => {
+    try {
+      await updateCerere(id, { status: "Approved" });
+      alert("Cerere approved successfully");
+      fetchCereri();
+    } catch (err) {
+      console.error("Error approving cerere:", err);
+      setError("Failed to approve cerere.");
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await updateCerere(id, { status: "Rejected" });
+      alert("Cerere rejected successfully");
+      fetchCereri();
+    } catch (err) {
+      console.error("Error rejecting cerere:", err);
+      setError("Failed to reject cerere.");
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    try {
+      await updateCerere(selectedCerereId, { comment });
+      alert("Comment added successfully");
+      setComment("");
+      setSelectedCerereId(null);
+      fetchCereri();
+    } catch (err) {
+      console.error("Error adding comment:", err);
+      setError("Failed to add comment.");
+    }
+  };
+
+  useEffect(() => {
+    fetchCereri();
+  }, []);
+
+  if (loading) {
+    return <p>Loading cereri...</p>;
+  }
+
+  return (
+    <div className="container mx-auto mt-10">
+      <h1 className="text-2xl font-bold mb-4">Teacher - Manage Cereri</h1>
+      {error && <p className="text-red-500">{error}</p>}
+
+      <table className="table-auto w-full border">
+        <thead>
+          <tr className="bg-gray-200">
+            <th className="border px-4 py-2">ID</th>
+            <th className="border px-4 py-2">User ID</th>
+            <th className="border px-4 py-2">Examen Sala ID</th>
+            <th className="border px-4 py-2">Data</th>
+            <th className="border px-4 py-2">Ora</th>
+            <th className="border px-4 py-2">Status</th>
+            <th className="border px-4 py-2">Comment</th>
+            <th className="border px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cereri.map((cerere) => (
+            <tr key={cerere.id_cerere}>
+              <td className="border px-4 py-2">{cerere.id_cerere}</td>
+              <td className="border px-4 py-2">{cerere.id_user}</td>
+              <td className="border px-4 py-2">{cerere.id_examene_sali}</td>
+              <td className="border px-4 py-2">
+                {new Date(cerere.data).toLocaleDateString()}
+              </td>
+              <td className="border px-4 py-2">
+                {new Date(cerere.ora).toLocaleTimeString()}
+              </td>
+              <td className="border px-4 py-2">{cerere.status || "Pending"}</td>
+              <td className="border px-4 py-2">
+                {cerere.comment || "No comment"}
+              </td>
+              <td className="border px-4 py-2 flex space-x-2">
+                <button
+                  onClick={() => handleApprove(cerere.id_cerere)}
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => handleReject(cerere.id_cerere)}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Reject
+                </button>
+                <button
+                  onClick={() => setSelectedCerereId(cerere.id_cerere)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Add Comment
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Comment Modal */}
+      {selectedCerereId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 className="text-xl font-bold mb-4">Add Comment</h2>
+            <form onSubmit={handleAddComment}>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Add your comment here..."
+                required
+                className="w-full border p-2 rounded mb-4"
+              ></textarea>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCerereId(null);
+                    setComment("");
+                  }}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Add Comment
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

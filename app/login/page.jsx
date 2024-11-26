@@ -2,33 +2,39 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { registerUser } from "../services/loginService";
+import { loginUser } from "../services/loginService";
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await registerUser(email, password);
-      const { message, user } = response; // Access assigned role from user
+      const response = await loginUser(email, password);
+      const { token, user } = response; // Extract user role
 
-      setSuccessMessage(
-        `${message}. Your role is ${user.role}. Redirecting to login...`
-      );
-      setErrorMessage("");
+      localStorage.setItem("token", token);
 
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      // Redirect based on role
+      switch (user.role) {
+        case "Profesor":
+          router.push("/dashboard/teacher");
+          break;
+        case "Secretariat":
+          router.push("/dashboard/secretary");
+          break;
+        case "Admin":
+          router.push("/dashboard/admin");
+          break;
+        default:
+          router.push("/dashboard/student");
+      }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || "Registration failed");
-      setSuccessMessage("");
+      setErrorMessage(error.response?.data?.message || "Login failed");
     }
   };
 
@@ -36,7 +42,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
         <header className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold">Register</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold">Login</h1>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -77,17 +83,12 @@ export default function RegisterPage() {
           {errorMessage && (
             <p className="text-red-500 text-sm text-center">{errorMessage}</p>
           )}
-          {successMessage && (
-            <p className="text-green-500 text-sm text-center">
-              {successMessage}
-            </p>
-          )}
 
           <button
             type="submit"
             className="px-8 py-3 bg-blue-600 text-white rounded-lg shadow-md"
           >
-            Register
+            Login
           </button>
         </form>
       </div>

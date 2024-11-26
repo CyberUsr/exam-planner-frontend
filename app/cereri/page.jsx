@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import {
   getAllCereri,
@@ -6,6 +7,18 @@ import {
   createCerere,
 } from "../services/cereriService";
 import { getAllExameneSali } from "../services/exameneSaliService";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 export default function CereriPage() {
   const [cereri, setCereri] = useState([]);
@@ -18,6 +31,7 @@ export default function CereriPage() {
     data: "",
     ora: "",
   });
+  const [cerereToDelete, setCerereToDelete] = useState(null); // State for selected cerere to delete
 
   const fetchCereri = async () => {
     setLoading(true);
@@ -42,11 +56,12 @@ export default function CereriPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this cerere?")) {
+  const handleDelete = async () => {
+    if (cerereToDelete) {
       try {
-        await deleteCerere(id);
-        alert("Cerere deleted successfully");
+        await deleteCerere(cerereToDelete);
+        //alert("Cerere deleted successfully");
+        setCerereToDelete(null);
         fetchCereri();
       } catch (err) {
         console.error("Error deleting cerere:", err);
@@ -180,12 +195,34 @@ export default function CereriPage() {
                 {new Date(cerere.ora).toLocaleTimeString()}
               </td>
               <td className="border px-4 py-2">
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded"
-                  onClick={() => handleDelete(cerere.id_cerere)}
-                >
-                  Delete
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="bg-red-500 text-white px-4 py-2 rounded"
+                      onClick={() => setCerereToDelete(cerere.id_cerere)}
+                    >
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete the selected cerere.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>
+                        Confirm
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </td>
             </tr>
           ))}

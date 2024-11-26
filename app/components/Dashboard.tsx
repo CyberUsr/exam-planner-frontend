@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Link from "next/link";
@@ -5,6 +6,21 @@ import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
 import { getAllProfesori } from "../services/profesoriService";
 import { getAllExamene } from "../services/exameneService";
+import { ChevronsUpDown, Check } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandItem,
+  CommandGroup,
+  CommandEmpty,
+} from "@/components/ui/command";
+import { Button } from "@/components/ui/button";
 
 interface Professor {
   id_profesor: string;
@@ -25,7 +41,8 @@ export default function Dashboard() {
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [filteredProfessors, setFilteredProfessors] = useState<Professor[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
-  const [searchQuery, setSearchQuery] = useState(""); // For searching professors
+  const [selectedProfessor, setSelectedProfessor] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(""); // For searching professors
   const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
   const [selectedWeek, setSelectedWeek] = useState<string>("Săptămâna 1");
 
@@ -72,17 +89,6 @@ export default function Dashboard() {
     });
   };
 
-  // Filter professors based on search query
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    const filtered = professors.filter((professor) =>
-      `${professor.nume} ${professor.prenume}`
-        .toLowerCase()
-        .includes(query.toLowerCase())
-    );
-    setFilteredProfessors(filtered);
-  };
-
   return (
     <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <Navbar />
@@ -90,22 +96,74 @@ export default function Dashboard() {
       <main className="p-4 sm:p-6 md:p-10 grid gap-8">
         {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          {/* Search Professor */}
+          {/* Professor Combobox */}
           <div className="w-full lg:w-1/2">
             <label
-              htmlFor="professor-search"
+              htmlFor="professor-combobox"
               className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2"
             >
-              Search Professor
+              Select or Search Professor
             </label>
-            <input
-              id="professor-search"
-              type="text"
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder="Type a professor's name"
-              className="block w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-400"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded="true"
+                  className="w-full justify-between"
+                >
+                  {selectedProfessor
+                    ? `${
+                        filteredProfessors.find(
+                          (prof) => prof.id_profesor === selectedProfessor
+                        )?.nume
+                      } ${
+                        filteredProfessors.find(
+                          (prof) => prof.id_profesor === selectedProfessor
+                        )?.prenume
+                      }`
+                    : "Select a professor..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Search professor..."
+                    value={searchQuery}
+                    onValueChange={(value) => setSearchQuery(value)}
+                  />
+                  <CommandList>
+                    <CommandEmpty>No professor found.</CommandEmpty>
+                    <CommandGroup>
+                      {filteredProfessors
+                        .filter((professor) =>
+                          `${professor.nume} ${professor.prenume}`
+                            .toLowerCase()
+                            .includes(searchQuery.toLowerCase())
+                        )
+                        .map((professor) => (
+                          <CommandItem
+                            key={professor.id_profesor}
+                            onSelect={() =>
+                              setSelectedProfessor(professor.id_profesor)
+                            }
+                          >
+                            <Check
+                              className={`mr-2 h-4 w-4 ${
+                                selectedProfessor === professor.id_profesor
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }`}
+                            />
+                            {`${professor.nume} ${professor.prenume}`}
+                          </CommandItem>
+                        ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Select Week */}
@@ -129,29 +187,6 @@ export default function Dashboard() {
               ))}
             </select>
           </div>
-        </div>
-
-        {/* Professors Dropdown */}
-        <div className="w-full lg:w-1/2">
-          <label
-            htmlFor="professor"
-            className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2"
-          >
-            Selectează profesor
-          </label>
-          <select
-            id="professor"
-            className="block w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-400"
-          >
-            <option disabled selected>
-              Alege un profesor
-            </option>
-            {filteredProfessors.map((professor) => (
-              <option key={professor.id_profesor} value={professor.id_profesor}>
-                {`${professor.nume} ${professor.prenume}`}
-              </option>
-            ))}
-          </select>
         </div>
 
         {/* Weekly Calendar */}
@@ -241,6 +276,15 @@ export default function Dashboard() {
             className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
           >
             Manage Sali
+          </Link>
+        </div>
+
+        <div className="flex justify-center mt-8">
+          <Link
+            href="/teacher-cereri"
+            className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          >
+            Manage Cereri
           </Link>
         </div>
       </main>
