@@ -22,7 +22,7 @@ export default function LoginPage() {
       // Redirect based on role
       switch (user.role) {
         case "Profesor":
-          router.push("/dashboard/teacher");
+          router.push("/dashboard/professor");
           break;
         case "Secretariat":
           router.push("/dashboard/secretary");
