@@ -35,7 +35,7 @@ export default function LoginForm() {
       // Redirect based on the user's role
       switch (user.role) {
         case "Profesor":
-          router.push("/dashboard/teacher");
+          router.push("/dashboard/professor");
           break;
         case "Secretariat":
           router.push("/dashboard/secretary");
@@ -103,7 +103,7 @@ export default function LoginForm() {
         </form>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
-          <a href="#" className="underline">
+          <a href="/register" className="underline">
             Sign up
           </a>
         </div>
