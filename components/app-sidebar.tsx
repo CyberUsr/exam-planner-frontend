@@ -67,8 +67,8 @@ const data = {
           url: "/cereri",
         },
         {
-          title: "Setari",
-          url: "#",
+          title: "Cereri Profesor",
+          url: "/teacher-cereri",
         },
       ],
     },
