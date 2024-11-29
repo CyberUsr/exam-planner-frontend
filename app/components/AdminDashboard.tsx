@@ -1,36 +1,70 @@
 "use client";
 
-import React from "react";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import Link from "next/link";
 
-const AdminDashboard = () => {
+const AdminSidebar = () => (
+  <SidebarMenu>
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild>
+        <Link href="/dashboard/admin/users">Manage Users</Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild>
+        <Link href="/dashboard/admin/analytics">System Analytics</Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  </SidebarMenu>
+);
+
+export default function AdminDashboard() {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-red-600 text-white p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <span>Welcome, Admin</span>
-      </header>
+    <SidebarProvider>
+      <AppSidebar>
+        <AdminSidebar />
+      </AppSidebar>
+      <SidebarInset>
+        {/* Header */}
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Admin</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
 
-      {/* Sidebar */}
-      <div className="flex flex-col md:flex-row">
-        <nav className="bg-white dark:bg-gray-800 w-full md:w-1/4 p-4 space-y-4">
-          <Link
-            href="/dashboard/admin/users"
-            className="block px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-gray-700 dark:text-gray-200 rounded"
-          >
-            Manage Users
-          </Link>
-          <Link
-            href="/dashboard/admin/analytics"
-            className="block px-4 py-2 text-red-600 hover:bg-red-100 dark:hover:bg-gray-700 dark:text-gray-200 rounded"
-          >
-            System Analytics
-          </Link>
-        </nav>
-
-        {/* Content */}
-        <main className="flex-1 p-4">
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-y-auto bg-gray-100 dark:bg-gray-900">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4">System Overview</h2>
             <ul>
@@ -39,9 +73,7 @@ const AdminDashboard = () => {
             </ul>
           </div>
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
-};
-
-export default AdminDashboard;
+}

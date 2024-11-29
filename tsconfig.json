@@ -31,7 +31,9 @@
     "app/register/page.jsx",
     "app/components/ManageExams.jsx",
     "app/examenele-mele/page.jsx",
-    "app/components/Dashboard.jsx"
+    "app/components/Dashboard.jsx",
+    "app/components/register-form.jsx",
+    "app/components/register-form.jsx"
   ],
   "exclude": ["node_modules"]
 }
