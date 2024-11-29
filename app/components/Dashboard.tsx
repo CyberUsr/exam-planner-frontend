@@ -93,7 +93,7 @@ export default function DashboardPage() {
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {/* <AppSidebar /> */}
       <SidebarInset>
         <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
           <main className="p-4 sm:p-6 md:p-10 grid gap-8">
