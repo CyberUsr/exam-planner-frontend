@@ -92,17 +92,17 @@ const data = {
       ],
     },
     {
-      title: "Cereri",
-      url: "#",
+      title: "Sali",
+      url: "/manage-sali",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Sali Examene",
+          url: "/manage-examen-sali",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Sali",
+          url: "/manage-sali",
         },
         {
           title: "Tutorials",

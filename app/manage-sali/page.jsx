@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +8,39 @@ import {
   updateSala,
   deleteSala,
 } from "../services/saliService";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+
+const adminNav = [
+  {
+    title: "Manage Sali",
+    url: "/dashboard/admin/sali",
+    icon: null,
+  },
+  {
+    title: "Exam Calendar",
+    url: "/dashboard/admin/exams",
+    icon: null,
+  },
+  {
+    title: "Statistici",
+    url: "/dashboard/admin/statistics",
+    icon: null,
+  },
+];
 
 export default function SaliPage() {
   const [sali, setSali] = useState([]);
@@ -76,93 +110,128 @@ export default function SaliPage() {
     }
   };
 
-  if (loading) {
-    return <p>Loading sali...</p>;
-  }
-
   return (
-    <div className="container mx-auto mt-10">
-      <h1 className="text-2xl font-bold mb-4">Manage Sali</h1>
-      {error && <p className="text-red-500">{error}</p>}
+    <SidebarProvider>
+      <AppSidebar
+        navMain={adminNav}
+        user={{
+          name: "Admin",
+          email: "admin@example.com",
+          avatar: "/avatars/admin.jpg",
+        }}
+      />
+      <SidebarInset>
+        {/* Header */}
+        <header className="flex h-16 shrink-0 items-center gap-2 bg-white dark:bg-gray-800 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Manage Sali</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">
-          {formData.id_sala ? "Edit Sala" : "Add New Sala"}
-        </h2>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="nume"
-            value={formData.nume}
-            onChange={handleInputChange}
-            placeholder="Sala Name"
-            required
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            name="shortName"
-            value={formData.shortName}
-            onChange={handleInputChange}
-            placeholder="Short Name"
-            required
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            name="buildingName"
-            value={formData.buildingName}
-            onChange={handleInputChange}
-            placeholder="Building Name"
-            required
-            className="border p-2 rounded"
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
-        >
-          {formData.id_sala ? "Update Sala" : "Add Sala"}
-        </button>
-      </form>
+        {/* Main Content */}
+        <main className="p-6 flex-1 bg-gray-100 dark:bg-gray-900">
+          <div className="grid gap-6">
+            {/* Form Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">
+                {formData.id_sala ? "Edit Sala" : "Add New Sala"}
+              </h2>
+              {error && <p className="text-red-500">{error}</p>}
+              <form
+                onSubmit={handleSubmit}
+                className="grid gap-4 sm:grid-cols-2"
+              >
+                <input
+                  type="text"
+                  name="nume"
+                  value={formData.nume}
+                  onChange={handleInputChange}
+                  placeholder="Sala Name"
+                  required
+                  className="border p-2 rounded"
+                />
+                <input
+                  type="text"
+                  name="shortName"
+                  value={formData.shortName}
+                  onChange={handleInputChange}
+                  placeholder="Short Name"
+                  required
+                  className="border p-2 rounded"
+                />
+                <input
+                  type="text"
+                  name="buildingName"
+                  value={formData.buildingName}
+                  onChange={handleInputChange}
+                  placeholder="Building Name"
+                  required
+                  className="border p-2 rounded"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded col-span-full"
+                >
+                  {formData.id_sala ? "Update Sala" : "Add Sala"}
+                </button>
+              </form>
+            </div>
 
-      {/* Table */}
-      <table className="table-auto w-full border">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2">ID</th>
-            <th className="border px-4 py-2">Name</th>
-            <th className="border px-4 py-2">Short Name</th>
-            <th className="border px-4 py-2">Building Name</th>
-            <th className="border px-4 py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sali.map((sala) => (
-            <tr key={sala.id_sala}>
-              <td className="border px-4 py-2">{sala.id_sala}</td>
-              <td className="border px-4 py-2">{sala.nume}</td>
-              <td className="border px-4 py-2">{sala.shortName}</td>
-              <td className="border px-4 py-2">{sala.buildingName}</td>
-              <td className="border px-4 py-2">
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-                  onClick={() => setFormData(sala)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded"
-                  onClick={() => handleDelete(sala.id_sala)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            {/* Table Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4">Existing Sali</h2>
+              <table className="table-auto w-full border">
+                <thead>
+                  <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <th className="border px-4 py-2">ID</th>
+                    <th className="border px-4 py-2">Name</th>
+                    <th className="border px-4 py-2">Short Name</th>
+                    <th className="border px-4 py-2">Building Name</th>
+                    <th className="border px-4 py-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sali.map((sala) => (
+                    <tr
+                      key={sala.id_sala}
+                      className="even:bg-gray-100 dark:even:bg-gray-700"
+                    >
+                      <td className="border px-4 py-2">{sala.id_sala}</td>
+                      <td className="border px-4 py-2">{sala.nume}</td>
+                      <td className="border px-4 py-2">{sala.shortName}</td>
+                      <td className="border px-4 py-2">{sala.buildingName}</td>
+                      <td className="border px-4 py-2">
+                        <button
+                          className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                          onClick={() => setFormData(sala)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-4 py-2 rounded"
+                          onClick={() => handleDelete(sala.id_sala)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
