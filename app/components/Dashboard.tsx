@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import Navbar from "./Navbar";
+
 import { getAllProfesori } from "../services/profesoriService";
 import { getAllExamene } from "../services/exameneService";
 import { ChevronsUpDown, Check } from "lucide-react";
@@ -96,8 +96,6 @@ export default function DashboardPage() {
       <AppSidebar />
       <SidebarInset>
         <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
-          <Navbar />
-
           <main className="p-4 sm:p-6 md:p-10 grid gap-8">
             {/* Filters */}
             <div className="flex flex-col lg:flex-row gap-6 mb-6">

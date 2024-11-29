@@ -41,12 +41,12 @@ const data = {
       plan: "Enterprise",
     },
     {
-      name: "Acme Corp.",
+      name: "FIESC",
       logo: AudioWaveform,
       plan: "Startup",
     },
     {
-      name: "Evil Corp.",
+      name: "FIMAR",
       logo: Command,
       plan: "Free",
     },
@@ -59,15 +59,15 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Examenele Mele",
+          url: "/examenele-mele",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Cereri",
+          url: "/cereri",
         },
         {
-          title: "Settings",
+          title: "Setari",
           url: "#",
         },
       ],
@@ -78,12 +78,12 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Statistici",
+          url: "/statistici",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "Chestionar",
+          url: "/chestionar",
         },
         {
           title: "Quantum",
