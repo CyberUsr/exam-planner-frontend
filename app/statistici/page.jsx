@@ -2,7 +2,39 @@
 
 import React from "react";
 import ReactECharts from "echarts-for-react";
-import Navbar from "../components/Navbar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+
+const adminNav = [
+  {
+    title: "Statistici",
+    url: "/dashboard/admin/statistics",
+    icon: null,
+  },
+  {
+    title: "Exam Calendar",
+    url: "/dashboard/admin/exams",
+    icon: null,
+  },
+  {
+    title: "Cereri",
+    url: "/dashboard/admin/cereri",
+    icon: null,
+  },
+];
 
 const Statistics = () => {
   const dummyData = [
@@ -34,10 +66,6 @@ const Statistics = () => {
         type: "shadow",
       },
     },
-    legend: {
-      data: ["Cereri"],
-      top: "10%",
-    },
     xAxis: {
       type: "category",
       data: dummyData.map((item) => item.date),
@@ -68,38 +96,72 @@ const Statistics = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="flex flex-col items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 w-full lg:w-2/3">
-          <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white text-center">
-            Statistici Examene
-          </h1>
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
-            <div className="text-center md:text-left">
-              <p className="text-lg font-semibold text-gray-600 dark:text-gray-300">
-                Total cereri:
-              </p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {totalRequests}
-              </p>
+    <SidebarProvider>
+      <AppSidebar
+        navMain={adminNav}
+        user={{
+          name: "Admin",
+          email: "admin@example.com",
+          avatar: "/avatars/admin.jpg",
+        }}
+      />
+      <SidebarInset>
+        {/* Header */}
+        <header className="flex h-16 shrink-0 items-center gap-2 bg-white dark:bg-gray-800 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Statistici</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+
+        {/* Main Content */}
+        <main className="p-6 flex-1 bg-gray-100 dark:bg-gray-900">
+          <div className="grid gap-6">
+            {/* Summary Stats Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white text-center">
+                Statistici Examene
+              </h1>
+              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="text-center md:text-left">
+                  <p className="text-lg font-semibold text-gray-600 dark:text-gray-300">
+                    Total cereri:
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {totalRequests}
+                  </p>
+                </div>
+                <div className="text-center md:text-left">
+                  <p className="text-lg font-semibold text-gray-600 dark:text-gray-300">
+                    Ziua cea mai populară:
+                  </p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {popularDate}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="text-center md:text-left">
-              <p className="text-lg font-semibold text-gray-600 dark:text-gray-300">
-                Ziua cea mai populară:
-              </p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {popularDate}
-              </p>
+
+            {/* Chart Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <ReactECharts
+                option={chartOptions}
+                style={{ height: "600px", width: "100%" }} // Increased graph height
+              />
             </div>
           </div>
-          <ReactECharts
-            option={chartOptions}
-            style={{ height: "400px", width: "100%" }}
-          />
-        </div>
-      </div>
-    </>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 
