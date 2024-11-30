@@ -59,6 +59,7 @@ export default function UpdateExam({ params }) {
   const [professorsList, setProfessorsList] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch professors and exam details
   useEffect(() => {
@@ -71,6 +72,16 @@ export default function UpdateExam({ params }) {
         // Fetch exam details
         if (id) {
           const examData = await getExamById(id);
+
+          // Safely extract first professor and assistant
+          const firstProfessor =
+            examData.professors && examData.professors.length > 0
+              ? examData.professors[0].id_profesor
+              : "";
+          const firstAssistant =
+            examData.assistants && examData.assistants.length > 0
+              ? examData.assistants[0].id_profesor
+              : "";
 
           // Parse date and time
           const examDate = new Date(examData.data);
@@ -86,14 +97,16 @@ export default function UpdateExam({ params }) {
             ora: formattedTime,
             tip_evaluare: examData.tip_evaluare || "",
             actualizatDe: "teacher",
-            professors: examData.professors[0]?.id_profesor || "",
-            assistants: examData.assistants[0]?.id_profesor || "",
+            professors: firstProfessor,
+            assistants: firstAssistant,
           });
         }
       } catch (error) {
         console.error("Error fetching data:", error);
         setToastMessage(`Failed to load exam details: ${error.message}`);
         setShowToast(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -109,14 +122,20 @@ export default function UpdateExam({ params }) {
 
     try {
       const { data, ora, professors, assistants, ...rest } = formData;
+
+      // Combine date and time
+      const combinedDateTime = new Date(`${data}T${ora}`);
+
       const formattedData = {
         ...rest,
-        data: new Date(`${data}T${ora}`).toISOString(),
-        professors: [professors],
-        assistants: [assistants],
+        data: combinedDateTime.toISOString(),
+        professors: professors ? [professors] : [],
+        assistants: assistants ? [assistants] : [],
+        actualizatLa: new Date().toISOString(),
       };
 
       await updateExam(id, formattedData);
+
       setToastMessage("Exam updated successfully!");
       setShowToast(true);
 
@@ -145,6 +164,15 @@ export default function UpdateExam({ params }) {
       setShowToast(true);
     }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
