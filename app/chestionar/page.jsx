@@ -1,7 +1,39 @@
 "use client";
+
 import React, { useState } from "react";
-import styled from "styled-components";
-import Navbar from "../components/Navbar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { Separator } from "@/components/ui/separator";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
+
+const adminNav = [
+  {
+    title: "Chestionar",
+    url: "/dashboard/admin/survey",
+    icon: null,
+  },
+  {
+    title: "Exam Calendar",
+    url: "/dashboard/admin/exams",
+    icon: null,
+  },
+  {
+    title: "Statistici",
+    url: "/dashboard/admin/statistics",
+    icon: null,
+  },
+];
 
 const Survey = () => {
   const [selectedExams, setSelectedExams] = useState({
@@ -62,140 +94,93 @@ const Survey = () => {
   };
 
   return (
-    <>
-      <Navbar />
-      <StyledSurvey>
-        <div className="container">
-          <h1>Chestionar pentru Stabilirea Datei Examenului</h1>
-          <form onSubmit={handleSubmit}>
-            {examSuggestions.map((exam) => (
-              <div key={exam.id} className="card">
-                <div className="card-header">
-                  <h2>{exam.subject}</h2>
-                  <p>Profesor: {exam.professor}</p>
-                </div>
-                <div className="card-content">
-                  <label htmlFor={`exam${exam.id}`}>
-                    Alege data examenului:
-                  </label>
-                  <select
-                    id={`exam${exam.id}`}
-                    value={selectedExams[`exam${exam.id}`]}
-                    onChange={(e) => handleChange(e, `exam${exam.id}`)}
+    <SidebarProvider>
+      <AppSidebar
+        navMain={adminNav}
+        user={{
+          name: "Admin",
+          email: "admin@example.com",
+          avatar: "/avatars/admin.jpg",
+        }}
+      />
+      <SidebarInset>
+        {/* Header */}
+        <header className="flex h-16 shrink-0 items-center gap-2 bg-white dark:bg-gray-800 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Chestionar</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+
+        {/* Main Content */}
+        <main className="p-6 flex-1 bg-gray-100 dark:bg-gray-900">
+          <div className="grid gap-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white text-center">
+                Chestionar pentru Stabilirea Datei Examenului
+              </h1>
+              <form
+                onSubmit={handleSubmit}
+                className="grid gap-4 sm:grid-cols-2"
+              >
+                {examSuggestions.map((exam) => (
+                  <div
+                    key={exam.id}
+                    className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-md"
                   >
-                    <option value="">Alege o dată...</option>
-                    {exam.dates.map((date, index) => (
-                      <option key={index} value={date}>
-                        {date}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            ))}
-            <button type="submit" className="submit-button">
-              Trimite Răspunsul
-            </button>
-          </form>
-        </div>
-      </StyledSurvey>
-    </>
+                    <div className="mb-4">
+                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                        {exam.subject}
+                      </h2>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Profesor: {exam.professor}
+                      </p>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor={`exam${exam.id}`}
+                        className="block text-sm font-medium text-gray-600 dark:text-gray-300"
+                      >
+                        Alege data examenului:
+                      </label>
+                      <select
+                        id={`exam${exam.id}`}
+                        value={selectedExams[`exam${exam.id}`]}
+                        onChange={(e) => handleChange(e, `exam${exam.id}`)}
+                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Alege o dată...</option>
+                        {exam.dates.map((date, index) => (
+                          <option key={index} value={date}>
+                            {date}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="submit"
+                  className="col-span-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"
+                >
+                  Trimite Răspunsul
+                </button>
+              </form>
+            </div>
+          </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
-
-const StyledSurvey = styled.div`
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: #f5f5f5;
-    border-radius: 20px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    color: #333;
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .card {
-    background: linear-gradient(120deg, #fdfbfb, #ebedee);
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
-
-    &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .card-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-
-      h2 {
-        font-size: 1.5rem;
-        color: #222;
-      }
-
-      p {
-        font-size: 1rem;
-        color: #555;
-      }
-    }
-
-    .card-content {
-      margin-top: 1rem;
-
-      label {
-        font-size: 1rem;
-        color: #444;
-        margin-bottom: 0.5rem;
-        display: block;
-      }
-
-      select {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 1rem;
-        background: #fff;
-        transition: border-color 0.3s ease;
-
-        &:focus {
-          border-color: #007bff;
-          outline: none;
-        }
-      }
-    }
-  }
-
-  .submit-button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1.2rem;
-    color: #fff;
-    background: #007bff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background: #0056b3;
-    }
-  }
-`;
 
 export default Survey;
