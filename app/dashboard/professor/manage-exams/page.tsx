@@ -1,5 +1,5 @@
 import ManageExams from "@/app/components/ManageExams";
 
 export default function ManageExamsPage() {
-  return <ManageExams />;
+  return <ManageExams params={undefined} />;
 }

@@ -86,8 +86,12 @@ const data = {
           url: "/chestionar",
         },
         {
-          title: "Quantum",
-          url: "#",
+          title: "Adauga Examene",
+          url: "/adaugare-examene",
+        },
+        {
+          title: "Manage Examene",
+          url: "/dashboard/professor/manage-exams",
         },
       ],
     },
