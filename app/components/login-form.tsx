@@ -49,7 +49,7 @@ export default function LoginForm() {
           router.push("/dashboard/professor");
           break;
         case "Secretariat":
-          router.push("/dashboard/secretary");
+          router.push("/dashboard/secretariat");
           break;
         case "Admin":
           router.push("/dashboard/admin");

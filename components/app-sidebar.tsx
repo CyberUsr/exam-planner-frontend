@@ -7,16 +7,13 @@ import {
   BookOpen,
   Bot,
   Command,
-  Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
   Settings2,
   SquareTerminal,
+  LucideIcon,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -27,13 +24,22 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// This is sample data.
-const data = {
-  user: {
-    name: "USV",
-    email: "usv.ro",
-    avatar: "/avatars/shadcn.jpg",
-  },
+interface NavItem {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+  isActive?: boolean;
+  roles?: string[]; // Add roles property for filtering
+  items?: NavItem[];
+}
+
+interface Team {
+  name: string;
+  logo: LucideIcon;
+  plan: string;
+}
+
+const baseData = {
   teams: [
     {
       name: "Exam Planner",
@@ -57,6 +63,7 @@ const data = {
       url: "#",
       icon: SquareTerminal,
       isActive: true,
+      roles: ["Student", "Admin"],
       items: [
         {
           title: "Examenele Mele",
@@ -66,32 +73,37 @@ const data = {
           title: "Cereri",
           url: "/cereri",
         },
-        {
-          title: "Cereri Profesor",
-          url: "/teacher-cereri",
-        },
       ],
     },
     {
       title: "Examene",
       url: "#",
       icon: Bot,
+      roles: ["Profesor", "Admin", "Secretariat"],
       items: [
         {
           title: "Statistici",
           url: "/statistici",
         },
         {
-          title: "Chestionar",
-          url: "/chestionar",
-        },
-        {
           title: "Adauga Examene",
           url: "/adaugare-examene",
+          roles: ["Profesor", "Secretariat"],
+        },
+        {
+          title: "Chestionar",
+          url: "/chestionar",
+          roles: ["Profesor"],
+        },
+        {
+          title: "Cereri Profesor",
+          url: "/teacher-cereri",
+          roles: ["Profesor"],
         },
         {
           title: "Manage Examene",
           url: "/dashboard/professor/manage-exams",
+          roles: ["Profesor"],
         },
       ],
     },
@@ -99,6 +111,7 @@ const data = {
       title: "Sali",
       url: "/manage-sali",
       icon: BookOpen,
+      roles: ["Secretariat", "Admin"],
       items: [
         {
           title: "Sali Examene",
@@ -108,36 +121,21 @@ const data = {
           title: "Sali",
           url: "/manage-sali",
         },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
       ],
     },
     {
       title: "Settings",
       url: "#",
       icon: Settings2,
+      roles: ["Admin"],
       items: [
         {
           title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
+          url: "/settings/general",
         },
         {
           title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          url: "/settings/billing",
         },
       ],
     },
@@ -145,16 +143,38 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [userRole, setUserRole] = React.useState<string>(""); // Fetch user role dynamically
+
+  // Simulate fetching user role from localStorage or API
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUserRole(parsedUser.role); // Assuming the role is stored in user data
+    }
+  }, []);
+
+  const filterNavItems = (navItems: NavItem[]): NavItem[] => {
+    return navItems
+      .filter((item) => !item.roles || item.roles.includes(userRole)) // Only include items the user has access to
+      .map((item) => ({
+        ...item,
+        items: item.items ? filterNavItems(item.items) : undefined, // Recursively filter sub-items
+      }));
+  };
+
+  const filteredNavMain = filterNavItems(baseData.navMain);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={baseData.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={filteredNavMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
