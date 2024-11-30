@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   getExamById,
   updateExam,
   deleteExam,
+  getAllProfesori,
 } from "../../services/exameneService";
 import {
   SidebarProvider,
@@ -42,61 +42,90 @@ const professorNav = [
   },
 ];
 
-export default function ExamDetails({ params }) {
+export default function UpdateExam({ params }) {
   const { id } = params;
   const router = useRouter();
+
   const [formData, setFormData] = useState({
     nume_materie: "",
     data: "",
     ora: "",
     tip_evaluare: "",
+    actualizatDe: "teacher",
+    professors: "",
+    assistants: "",
   });
+
+  const [professorsList, setProfessorsList] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
+  // Fetch professors and exam details
   useEffect(() => {
-    if (!id) return;
-
-    const fetchExam = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getExamById(id);
-        setFormData({
-          nume_materie: data.nume_materie,
-          data: data.data.split("T")[0],
-          ora: data.data.split("T")[1]?.slice(0, 5),
-          tip_evaluare: data.tip_evaluare,
-        });
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // Fetch professors list
+        const professorsData = await getAllProfesori();
+        setProfessorsList(professorsData);
+
+        // Fetch exam details
+        if (id) {
+          const examData = await getExamById(id);
+
+          // Parse date and time
+          const examDate = new Date(examData.data);
+          const formattedDate = examDate.toISOString().split("T")[0];
+          const formattedTime = examDate
+            .toTimeString()
+            .split(" ")[0]
+            .slice(0, 5);
+
+          setFormData({
+            nume_materie: examData.nume_materie || "",
+            data: formattedDate,
+            ora: formattedTime,
+            tip_evaluare: examData.tip_evaluare || "",
+            actualizatDe: "teacher",
+            professors: examData.professors[0]?.id_profesor || "",
+            assistants: examData.assistants[0]?.id_profesor || "",
+          });
+        }
       } catch (error) {
-        setToastMessage("Failed to load exam details.");
+        console.error("Error fetching data:", error);
+        setToastMessage(`Failed to load exam details: ${error.message}`);
         setShowToast(true);
       }
     };
 
-    fetchExam();
+    fetchData();
   }, [id]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleUpdate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const updatedData = {
-        nume_materie: formData.nume_materie,
-        data: new Date(`${formData.data}T${formData.ora}`).toISOString(),
-        tip_evaluare: formData.tip_evaluare,
+      const { data, ora, professors, assistants, ...rest } = formData;
+      const formattedData = {
+        ...rest,
+        data: new Date(`${data}T${ora}`).toISOString(),
+        professors: [professors],
+        assistants: [assistants],
       };
 
-      await updateExam(id, updatedData);
+      await updateExam(id, formattedData);
       setToastMessage("Exam updated successfully!");
       setShowToast(true);
+
       setTimeout(() => {
         router.push("/dashboard/professor/manage-exams");
       }, 3000);
     } catch (error) {
-      setToastMessage("Failed to update exam.");
+      console.error("Failed to update exam:", error);
+      setToastMessage(`Failed to update exam: ${error.message}`);
       setShowToast(true);
     }
   };
@@ -106,11 +135,13 @@ export default function ExamDetails({ params }) {
       await deleteExam(id);
       setToastMessage("Exam deleted successfully!");
       setShowToast(true);
+
       setTimeout(() => {
         router.push("/dashboard/professor/manage-exams");
       }, 3000);
     } catch (error) {
-      setToastMessage("Failed to delete exam.");
+      console.error("Failed to delete exam:", error);
+      setToastMessage(`Failed to delete exam: ${error.message}`);
       setShowToast(true);
     }
   };
@@ -137,7 +168,7 @@ export default function ExamDetails({ params }) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Exam Details</BreadcrumbPage>
+                <BreadcrumbPage>Update Exam</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -148,7 +179,7 @@ export default function ExamDetails({ params }) {
           <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
             Update Exam
           </h1>
-          <form onSubmit={handleUpdate} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Subject */}
             <div>
               <label
@@ -164,7 +195,8 @@ export default function ExamDetails({ params }) {
                 value={formData.nume_materie}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter the subject"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
 
@@ -183,7 +215,7 @@ export default function ExamDetails({ params }) {
                 value={formData.data}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
 
@@ -202,7 +234,7 @@ export default function ExamDetails({ params }) {
                 value={formData.ora}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
             </div>
 
@@ -220,28 +252,81 @@ export default function ExamDetails({ params }) {
                 value={formData.tip_evaluare}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
+                <option value="" disabled>
+                  Select an exam type
+                </option>
                 <option value="Final">Final</option>
                 <option value="Partial">Partial</option>
                 <option value="Test">Test</option>
               </select>
             </div>
 
-            {/* Buttons */}
-            <div className="flex justify-between">
+            {/* Professors */}
+            <div>
+              <label
+                htmlFor="professors"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Select Professor
+              </label>
+              <select
+                id="professors"
+                name="professors"
+                value={formData.professors}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="">Choose a professor</option>
+                {professorsList.map((prof) => (
+                  <option key={prof.id_profesor} value={prof.id_profesor}>
+                    {prof.firstName} {prof.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Assistants */}
+            <div>
+              <label
+                htmlFor="assistants"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Select Assistant
+              </label>
+              <select
+                id="assistants"
+                name="assistants"
+                value={formData.assistants}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="">Choose an assistant</option>
+                {professorsList.map((prof) => (
+                  <option key={prof.id_profesor} value={prof.id_profesor}>
+                    {prof.firstName} {prof.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between space-x-4">
               <button
                 type="submit"
-                className="w-1/2 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none"
               >
-                Update
+                Update Exam
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="w-1/2 px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700"
+                className="flex-1 px-6 py-3 bg-red-600 text-white font-semibold rounded-md shadow-md hover:bg-red-700 focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:outline-none"
               >
-                Delete
+                Delete Exam
               </button>
             </div>
           </form>
@@ -252,12 +337,25 @@ export default function ExamDetails({ params }) {
       {showToast && (
         <div
           id="toast-simple"
-          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 bg-white dark:bg-gray-800"
+          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-x divide-gray-200 rounded-lg shadow dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800"
           role="alert"
         >
-          <div className="text-sm font-normal text-gray-500">
-            {toastMessage}
-          </div>
+          <svg
+            className="w-5 h-5 text-blue-600 dark:text-blue-500 rotate-45"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 18 20"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="m9 17 8 2L9 1 1 19l8-2Zm0 0V9"
+            />
+          </svg>
+          <div className="ps-4 text-sm font-normal">{toastMessage}</div>
         </div>
       )}
     </SidebarProvider>

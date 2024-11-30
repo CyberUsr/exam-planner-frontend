@@ -1,12 +1,11 @@
-// contexts/UserContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 interface User {
   name: string;
   email: string;
-  role: string; // e.g., "admin", "teacher", "student", "secretary"
+  role: string;
   avatar: string;
 }
 
@@ -19,21 +18,6 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Simulate fetching user data
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      setUser({
-        name: "USV",
-        email: "usv.ro",
-        role: "student", // Default role
-        avatar: "/avatars/shadcn.jpg",
-      });
-    }
-  }, []);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

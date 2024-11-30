@@ -71,3 +71,17 @@ export const deleteExam = async (id_exam) => {
     throw new Error("Failed to delete exam.");
   }
 };
+
+// Fetch all professors
+export const getAllProfesori = async () => {
+  try {
+    const response = await axios.get("http://localhost:3003/profesori");
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching professors:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to fetch professors.");
+  }
+};

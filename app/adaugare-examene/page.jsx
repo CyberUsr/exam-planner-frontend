@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createExam } from "../services/exameneService";
+import { createExam, getAllProfesori } from "../services/exameneService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -44,9 +44,25 @@ export default function ScheduleExam() {
     ora: "",
     tip_evaluare: "",
     actualizatDe: "teacher",
+    professors: "",
+    assistants: "",
   });
+  const [professorsList, setProfessorsList] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchProfessors = async () => {
+      try {
+        const data = await getAllProfesori();
+        setProfessorsList(data);
+      } catch (error) {
+        console.error("Error fetching professors:", error);
+      }
+    };
+
+    fetchProfessors();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -56,11 +72,12 @@ export default function ScheduleExam() {
     e.preventDefault();
 
     try {
-      const { data, ora, ...rest } = formData;
+      const { data, ora, professors, assistants, ...rest } = formData;
       const formattedData = {
         ...rest,
         data: new Date(`${data}T${ora}`).toISOString(),
-        ora: new Date(`${data}T${ora}`).toISOString(),
+        professors: [professors],
+        assistants: [assistants],
       };
 
       await createExam(formattedData);
@@ -189,6 +206,56 @@ export default function ScheduleExam() {
                 <option value="Final">Final</option>
                 <option value="Partial">Partial</option>
                 <option value="Test">Test</option>
+              </select>
+            </div>
+
+            {/* Professors */}
+            <div>
+              <label
+                htmlFor="professors"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Select Professor
+              </label>
+              <select
+                id="professors"
+                name="professors"
+                value={formData.professors}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="">Choose a professor</option>
+                {professorsList.map((prof) => (
+                  <option key={prof.id_profesor} value={prof.id_profesor}>
+                    {prof.firstName} {prof.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Assistants */}
+            <div>
+              <label
+                htmlFor="assistants"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Select Assistant
+              </label>
+              <select
+                id="assistants"
+                name="assistants"
+                value={formData.assistants}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="">Choose an assistant</option>
+                {professorsList.map((prof) => (
+                  <option key={prof.id_profesor} value={prof.id_profesor}>
+                    {prof.firstName} {prof.lastName}
+                  </option>
+                ))}
               </select>
             </div>
 
