@@ -5,9 +5,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-
 import { getAllProfesori } from "../services/profesoriService";
-import { getAllExamene } from "../services/exameneService";
+import {
+  getAllExamene,
+  exportExamsGroupedByDay,
+} from "../services/exameneService";
+import { jsPDF } from "jspdf";
+import Papa from "papaparse";
 import { ChevronsUpDown, Check } from "lucide-react";
 import {
   Popover,
@@ -39,8 +43,15 @@ interface Exam {
   actualizatDe: string;
 }
 
+interface GroupedExam {
+  subject: string;
+  time: string;
+  professors: string[];
+  assistants: string[];
+  rooms: { roomName: string; building: string }[];
+}
+
 export default function DashboardPage() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [professors, setProfessors] = useState<Professor[]>([]);
   const [filteredProfessors, setFilteredProfessors] = useState<Professor[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
@@ -82,176 +93,154 @@ export default function DashboardPage() {
     sâmbătă: 6,
   } as const;
 
-  const getExamsForSlot = (day: keyof typeof weekdayMap, timeSlot: string) => {
+  const getExamsForSlot = (
+    day: keyof typeof weekdayMap,
+    timeSlot: string
+  ): Exam[] => {
     return exams.filter((exam) => {
       const examDate = new Date(exam.data);
       const examDay = examDate.getDay();
       const examTime = `${examDate.getHours()}-${examDate.getHours() + 2}`;
-
       return examDay === weekdayMap[day] && examTime === timeSlot;
     });
   };
 
+  const handleExportAsPDF = async () => {
+    try {
+      const groupedExams: Record<string, GroupedExam[]> =
+        await exportExamsGroupedByDay();
+      const doc = new jsPDF();
+      doc.setFontSize(12);
+      doc.text("Exams Grouped by Day", 10, 10);
+
+      Object.keys(groupedExams).forEach((date, index) => {
+        doc.text(`Date: ${date}`, 10, 20 + index * 10);
+        groupedExams[date].forEach((exam, examIndex) => {
+          doc.text(
+            `- ${exam.subject} (${
+              exam.time
+            }) - Professors: ${exam.professors.join(", ")}`,
+            10,
+            30 + index * 10 + examIndex * 5
+          );
+        });
+      });
+
+      doc.save("exams_grouped_by_day.pdf");
+    } catch (error) {
+      console.error("Failed to export as PDF:", error);
+    }
+  };
+
+  const handleExportAsCSV = async () => {
+    try {
+      const groupedExams: Record<string, GroupedExam[]> =
+        await exportExamsGroupedByDay();
+      const rows: Record<string, string>[] = [];
+
+      Object.keys(groupedExams).forEach((date) => {
+        groupedExams[date].forEach((exam) => {
+          rows.push({
+            Date: date,
+            Subject: exam.subject,
+            Time: exam.time,
+            Professors: exam.professors.join(", "),
+            Assistants: exam.assistants.join(", "),
+            Rooms: exam.rooms.map((room) => room.roomName).join(", "),
+          });
+        });
+      });
+
+      const csv = Papa.unparse(rows);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "exams_grouped_by_day.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to export as CSV:", error);
+    }
+  };
+
   return (
     <SidebarProvider>
-      {/* <AppSidebar /> */}
       <SidebarInset>
         <div className="grid grid-rows-[auto_1fr_auto] min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100">
           <main className="p-4 sm:p-6 md:p-10 grid gap-8">
-            {/* Filters */}
-            <div className="flex flex-col lg:flex-row gap-6 mb-6">
-              {/* Professor Combobox */}
-              <div className="w-full lg:w-1/2">
-                <label
-                  htmlFor="professor-combobox"
-                  className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2"
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold">Calendar săptămânal</h2>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleExportAsPDF}
+                  className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
                 >
-                  Select or Search Professor
-                </label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded="true"
-                      className="w-full justify-between"
-                    >
-                      {selectedProfessor
-                        ? `${
-                            filteredProfessors.find(
-                              (prof) => prof.id_profesor === selectedProfessor
-                            )?.nume
-                          } ${
-                            filteredProfessors.find(
-                              (prof) => prof.id_profesor === selectedProfessor
-                            )?.prenume
-                          }`
-                        : "Select a professor..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput
-                        placeholder="Search professor..."
-                        value={searchQuery}
-                        onValueChange={(value) => setSearchQuery(value)}
-                      />
-                      <CommandList>
-                        <CommandEmpty>No professor found.</CommandEmpty>
-                        <CommandGroup>
-                          {filteredProfessors
-                            .filter((professor) =>
-                              `${professor.nume} ${professor.prenume}`
-                                .toLowerCase()
-                                .includes(searchQuery.toLowerCase())
-                            )
-                            .map((professor) => (
-                              <CommandItem
-                                key={professor.id_profesor}
-                                onSelect={() =>
-                                  setSelectedProfessor(professor.id_profesor)
-                                }
-                              >
-                                <Check
-                                  className={`mr-2 h-4 w-4 ${
-                                    selectedProfessor === professor.id_profesor
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  }`}
-                                />
-                                {`${professor.nume} ${professor.prenume}`}
-                              </CommandItem>
-                            ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {/* Select Week */}
-              <div className="w-full lg:w-1/2">
-                <label
-                  htmlFor="week"
-                  className="block text-sm font-medium text-gray-800 dark:text-gray-300 mb-2"
+                  Export as PDF
+                </button>
+                <button
+                  onClick={handleExportAsCSV}
+                  className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700"
                 >
-                  Alege săptămâna
-                </label>
-                <select
-                  id="week"
-                  value={selectedWeek}
-                  onChange={(e) => setSelectedWeek(e.target.value)}
-                  className="block w-full px-4 py-3 text-sm border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-400"
-                >
-                  {weeks.map((week, index) => (
-                    <option key={index} value={week}>
-                      {week}
-                    </option>
-                  ))}
-                </select>
+                  Export as CSV
+                </button>
               </div>
             </div>
 
-            {/* Weekly Calendar */}
             <section className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-100">
-                Calendar săptămânal
-              </h2>
               <div className="overflow-x-auto">
-                <div className="min-w-[800px]">
-                  <table className="w-full text-center border-collapse text-sm sm:text-base">
-                    <thead>
-                      <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                        <th className="p-3 border border-gray-300 dark:border-gray-600">
-                          Ora
+                <table className="w-full text-center border-collapse text-sm sm:text-base">
+                  <thead>
+                    <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                      <th className="p-3 border border-gray-300 dark:border-gray-600">
+                        Ora
+                      </th>
+                      {Object.keys(weekdayMap).map((day) => (
+                        <th
+                          key={day}
+                          className="p-3 border border-gray-300 dark:border-gray-600"
+                        >
+                          {day}
                         </th>
-                        {Object.keys(weekdayMap).map((day) => (
-                          <th
-                            key={day}
-                            className="p-3 border border-gray-300 dark:border-gray-600"
-                          >
-                            {day}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Array.from({ length: 11 }, (_, i) => {
-                        const timeSlot = `${8 + i}-${10 + i}`;
-                        return (
-                          <tr
-                            key={i}
-                            className="even:bg-gray-100 dark:even:bg-gray-700"
-                          >
-                            <td className="p-3 border border-gray-300 dark:border-gray-600">
-                              {timeSlot}
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.from({ length: 11 }, (_, i) => {
+                      const timeSlot = `${8 + i}-${10 + i}`;
+                      return (
+                        <tr
+                          key={i}
+                          className="even:bg-gray-100 dark:even:bg-gray-700"
+                        >
+                          <td className="p-3 border border-gray-300 dark:border-gray-600">
+                            {timeSlot}
+                          </td>
+                          {Object.keys(weekdayMap).map((day) => (
+                            <td
+                              key={day}
+                              className="p-3 border border-gray-300 dark:border-gray-600"
+                            >
+                              {getExamsForSlot(
+                                day as keyof typeof weekdayMap,
+                                timeSlot
+                              ).map((exam) => (
+                                <Link
+                                  key={exam.id_examene}
+                                  href={`/examene/${exam.id_examene}`}
+                                  className="block p-2 bg-blue-500 text-white rounded mb-2"
+                                >
+                                  {exam.nume_materie}
+                                </Link>
+                              ))}
                             </td>
-                            {Object.keys(weekdayMap).map((day) => (
-                              <td
-                                key={day}
-                                className="p-3 border border-gray-300 dark:border-gray-600"
-                              >
-                                {getExamsForSlot(
-                                  day as keyof typeof weekdayMap,
-                                  timeSlot
-                                ).map((exam) => (
-                                  <Link
-                                    key={exam.id_examene}
-                                    href={`/examene/${exam.id_examene}`}
-                                    className="block p-2 bg-blue-500 text-white rounded mb-2"
-                                  >
-                                    {exam.nume_materie}
-                                  </Link>
-                                ))}
-                              </td>
-                            ))}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </section>
           </main>

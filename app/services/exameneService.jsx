@@ -85,3 +85,17 @@ export const getAllProfesori = async () => {
     throw new Error("Failed to fetch professors.");
   }
 };
+
+// Fetch exams grouped by day
+export const exportExamsGroupedByDay = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/export`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error exporting exams grouped by day:",
+      error.response?.data || error.message
+    );
+    throw new Error("Failed to export exams grouped by day.");
+  }
+};
