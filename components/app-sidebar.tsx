@@ -63,7 +63,7 @@ const baseData = {
       url: "#",
       icon: SquareTerminal,
       isActive: true,
-      roles: ["Student", "Admin"],
+      roles: ["Student", "Secretariat", "Admin"],
       items: [
         {
           title: "Examenele Mele",
@@ -72,6 +72,16 @@ const baseData = {
         {
           title: "Cereri",
           url: "/cereri",
+        },
+        {
+          title: "Adaugare Studenti",
+          url: "/adaugare-studenti",
+          roles: ["Secretariat"],
+        },
+        {
+          title: "Vizualizare Studenti",
+          url: "/view-studenti",
+          roles: ["Secretariat"],
         },
       ],
     },
@@ -104,6 +114,22 @@ const baseData = {
           title: "Manage Examene",
           url: "/dashboard/professor/manage-exams",
           roles: ["Profesor"],
+        },
+      ],
+    },
+    {
+      title: "Profesori",
+      url: "/manage-sali",
+      icon: BookOpen,
+      roles: ["Secretariat"],
+      items: [
+        {
+          title: "Adauga Profesori",
+          url: "/adaugare-profesori",
+        },
+        {
+          title: "Vizualizare Profesori",
+          url: "/view-profesori",
         },
       ],
     },
