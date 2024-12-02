@@ -70,6 +70,14 @@ const baseData = {
           url: "/examenele-mele",
         },
         {
+          title: "Examenele by Dificultate",
+          url: "/examene-by-dificulty",
+        },
+        {
+          title: "Examenene All",
+          url: "/examene-all",
+        },
+        {
           title: "Cereri",
           url: "/cereri",
         },
