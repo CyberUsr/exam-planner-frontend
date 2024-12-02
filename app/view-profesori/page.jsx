@@ -10,6 +10,14 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function ManageTeachers() {
   const [teachers, setTeachers] = useState([]);
@@ -32,20 +40,30 @@ export default function ManageTeachers() {
       <AppSidebar />
       <SidebarInset>
         <main className="p-6 flex-1 bg-gray-100 dark:bg-gray-900">
-          <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
-            Manage Teachers
-          </h1>
+          <header className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">
+              Manage Teachers
+            </h1>
+          </header>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {teachers.map((teacher) => (
-              <div
-                key={teacher.id_profesor}
-                className="p-4 border rounded-md bg-white dark:bg-gray-800"
-              >
-                <h2 className="text-xl font-bold">{`${teacher.firstName} ${teacher.lastName}`}</h2>
-                <p>Email: {teacher.emailAddress}</p>
-                <p>Phone: {teacher.phoneNumber}</p>
-                <p>Department ID: {teacher.idDepartament}</p>
-              </div>
+              <Card key={teacher.id_profesor}>
+                <CardHeader>
+                  <CardTitle>{`${teacher.firstName} ${teacher.lastName}`}</CardTitle>
+                  <CardDescription>
+                    Department ID: {teacher.idDepartament}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>Email: {teacher.emailAddress}</p>
+                  <p>Phone: {teacher.phoneNumber}</p>
+                </CardContent>
+                <CardFooter>
+                  <p className="text-sm text-gray-500">
+                    ID: {teacher.id_profesor}
+                  </p>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </main>

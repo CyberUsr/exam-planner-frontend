@@ -85,6 +85,19 @@ const baseData = {
         },
       ],
     },
+
+    {
+      title: "Chestionar",
+      url: "#",
+      icon: Bot,
+      roles: ["Student"],
+      items: [
+        {
+          title: "Chestionar Examene",
+          url: "/chestionar",
+        },
+      ],
+    },
     {
       title: "Examene",
       url: "#",
@@ -103,7 +116,7 @@ const baseData = {
         {
           title: "Chestionar",
           url: "/chestionar",
-          roles: ["Profesor"],
+          roles: ["Profesor", "Studenti"],
         },
         {
           title: "Cereri Profesor",
