@@ -99,3 +99,15 @@ export const exportExamsGroupedByDay = async () => {
     throw new Error("Failed to export exams grouped by day.");
   }
 };
+
+export const filterExams = async (specialization, year, group) => {
+  try {
+    const response = await axios.get(`${API_URL}/filter`, {
+      params: { specialization, year, group },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching filtered exams:", error);
+    throw error;
+  }
+};

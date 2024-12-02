@@ -10,6 +10,14 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function ManageStudents() {
   const [students, setStudents] = useState([]);
@@ -37,15 +45,21 @@ export default function ManageStudents() {
           </h1>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {students.map((student) => (
-              <div
-                key={student.id_student}
-                className="p-4 border rounded-md bg-white dark:bg-gray-800"
-              >
-                <h2 className="text-xl font-bold">{`${student.prenume} ${student.nume}`}</h2>
-                <p>Group: {student.grupa}</p>
-                <p>Year: {student.anul}</p>
-                <p>Specialization: {student.specializare}</p>
-              </div>
+              <Card key={student.id_student}>
+                <CardHeader>
+                  <CardTitle>{`${student.prenume} ${student.nume}`}</CardTitle>
+                  <CardDescription>Group: {student.grupa}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>Year: {student.anul}</p>
+                  <p>Specialization: {student.specializare}</p>
+                </CardContent>
+                <CardFooter>
+                  <p className="text-sm text-gray-500">
+                    ID: {student.id_student}
+                  </p>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </main>
