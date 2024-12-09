@@ -51,6 +51,7 @@ export default function ScheduleExam() {
   const [showToast, setShowToast] = useState(false);
   const router = useRouter();
 
+  // Fetch professors on component mount
   useEffect(() => {
     const fetchProfessors = async () => {
       try {
@@ -64,31 +65,47 @@ export default function ScheduleExam() {
     fetchProfessors();
   }, []);
 
+  // Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const { data, ora, professors, assistants, ...rest } = formData;
-      const formattedData = {
+
+      // Validate date and time format
+      if (!data || !ora) {
+        throw new Error("Date and time are required.");
+      }
+      const combinedDateTime = new Date(`${data}T${ora}`);
+      if (isNaN(combinedDateTime.getTime())) {
+        throw new Error("Invalid date or time format.");
+      }
+
+      // Prepare payload
+      const payload = {
         ...rest,
-        data: new Date(`${data}T${ora}`).toISOString(),
-        professors: [professors],
+        data, // Pass only the date part as per backend expectations
+        ora, // Pass only the time part as per backend expectations
+        professors: [professors], // Ensure these are arrays
         assistants: [assistants],
       };
 
-      await createExam(formattedData);
-      setShowToast(true);
+      // Call the API to create the exam
+      await createExam(payload);
 
+      // Show success toast and redirect
+      setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
         router.push("/dashboard/professor/manage-exams");
       }, 3000);
     } catch (error) {
-      console.error("Failed to schedule exam:", error);
+      console.error("Failed to schedule exam:", error.message);
     }
   };
 
@@ -103,7 +120,6 @@ export default function ScheduleExam() {
         }}
       />
       <SidebarInset>
-        {/* Header */}
         <header className="flex h-16 shrink-0 items-center gap-2 bg-white dark:bg-gray-800 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -120,7 +136,6 @@ export default function ScheduleExam() {
           </Breadcrumb>
         </header>
 
-        {/* Main Content */}
         <main className="p-6 flex-1 bg-gray-100 dark:bg-gray-900">
           <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
             Schedule an Exam

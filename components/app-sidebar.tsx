@@ -138,6 +138,19 @@ const baseData = {
         },
       ],
     },
+
+    {
+      title: "Materii",
+      url: "#",
+      icon: BookOpen,
+      roles: ["Profesor", "Admin", "Secretariat"],
+      items: [
+        {
+          title: "Manage Materii",
+          url: "/manage-materii",
+        },
+      ],
+    },
     {
       title: "Profesori",
       url: "/manage-sali",
