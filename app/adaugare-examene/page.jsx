@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createExam, getAllProfesori } from "../services/exameneService";
+import { getAllMaterii, findMaterieById } from "../services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -19,100 +20,135 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 
-const professorNav = [
-  {
-    title: "Manage Exams",
-    url: "/dashboard/professor/manage-exams",
-    icon: null,
-  },
-  {
-    title: "Schedule Exam",
-    url: "/dashboard/professor/schedule-exam",
-    icon: null,
-  },
-  {
-    title: "Manage Cereri",
-    url: "/dashboard/professor/manage-cereri",
-    icon: null,
-  },
-];
-
 export default function ScheduleExam() {
   const [formData, setFormData] = useState({
-    nume_materie: "",
+    id_materie: "",
     data: "",
     ora: "",
     tip_evaluare: "",
-    actualizatDe: "teacher",
     professors: "",
     assistants: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [professorsList, setProfessorsList] = useState([]);
+  const [materii, setMaterii] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const router = useRouter();
 
-  // Fetch professors on component mount
   useEffect(() => {
-    const fetchProfessors = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const data = await getAllProfesori();
-        setProfessorsList(data);
-      } catch (error) {
-        console.error("Error fetching professors:", error);
+        const [professorsData, materiiData] = await Promise.all([
+          getAllProfesori(),
+          getAllMaterii(),
+        ]);
+        setProfessorsList(professorsData);
+        setMaterii(materiiData);
+      } catch (err) {
+        setError("Failed to load initial data. Please refresh the page.");
+        console.error("Error loading data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchProfessors();
+    fetchData();
   }, []);
 
-  // Handle input change
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const validateMaterie = async (id_materie) => {
+    if (!id_materie) {
+      throw new Error("Subject ID is required.");
+    }
+
+    const materie = await findMaterieById(id_materie);
+    if (!materie) {
+      throw new Error(`Subject with ID "${id_materie}" does not exist.`);
+    }
+
+    return materie;
   };
 
-  // Handle form submission
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const { data, ora, professors, assistants, ...rest } = formData;
+      const { id_materie, data, ora, tip_evaluare, professors, assistants } = formData;
 
-      // Validate date and time format
-      if (!data || !ora) {
-        throw new Error("Date and time are required.");
-      }
-      const combinedDateTime = new Date(`${data}T${ora}`);
-      if (isNaN(combinedDateTime.getTime())) {
-        throw new Error("Invalid date or time format.");
+      // Validate required fields
+      if (!id_materie || !data || !ora || !tip_evaluare || !professors || !assistants) {
+        throw new Error("Please fill in all required fields.");
       }
 
-      // Prepare payload
+      // Validate the subject by ID
+      await validateMaterie(id_materie);
+
+      // Prepare ISO date-time string
+      const isoDateTime = `${data}T${ora}:00.000Z`;
+
+      // Create exam payload
       const payload = {
-        ...rest,
-        data, // Pass only the date part as per backend expectations
-        ora, // Pass only the time part as per backend expectations
-        professors: [professors], // Ensure these are arrays
+        id_materie,
+        data_ora: isoDateTime,
+        tip_evaluare,
+        professors: [professors],
         assistants: [assistants],
       };
 
-      // Call the API to create the exam
+      // API Call to create exam
       await createExam(payload);
 
-      // Show success toast and redirect
+      // Success handling
+      setToastMessage("Exam scheduled successfully!");
       setShowToast(true);
+      setFormData({
+        id_materie: "",
+        data: "",
+        ora: "",
+        tip_evaluare: "",
+        professors: "",
+        assistants: "",
+      });
+
+      // Redirect
       setTimeout(() => {
-        setShowToast(false);
         router.push("/dashboard/professor/manage-exams");
-      }, 3000);
+      }, 2000);
     } catch (error) {
-      console.error("Failed to schedule exam:", error.message);
+      setError(error.message || "Failed to schedule exam. Please try again.");
+      setToastMessage(error.message || "Failed to schedule exam. Please try again.");
+      setShowToast(true);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading && !professorsList.length && !materii.length) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
       <AppSidebar
-        navMain={professorNav}
+        navMain={{
+          title: "Manage Exams",
+          url: "/dashboard/professor/manage-exams",
+        }}
         user={{
           name: "Professor",
           email: "professor@example.com",
@@ -140,66 +176,77 @@ export default function ScheduleExam() {
           <h1 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">
             Schedule an Exam
           </h1>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Subject */}
-            <div>
-              <label
-                htmlFor="nume_materie"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Subject
-              </label>
-              <input
-                type="text"
-                id="nume_materie"
-                name="nume_materie"
-                value={formData.nume_materie}
-                onChange={handleChange}
-                required
-                placeholder="Enter the subject"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
 
-            {/* Date */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
             <div>
               <label
-                htmlFor="data"
+                htmlFor="id_materie"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Date
+                Select Subject
               </label>
-              <input
-                type="date"
-                id="data"
-                name="data"
-                value={formData.data}
+              <select
+                id="id_materie"
+                name="id_materie"
+                value={formData.id_materie}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            {/* Time */}
-            <div>
-              <label
-                htmlFor="ora"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Time
-              </label>
-              <input
-                type="time"
-                id="ora"
-                name="ora"
-                value={formData.ora}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
+                <option value="">Choose a subject</option>
+                {materii.map((materie) => (
+                  <option key={materie.id_materie} value={materie.id_materie}>
+                    {materie.nume_materie}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Exam Type */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  htmlFor="data"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Date
+                </label>
+                <input
+                  type="date"
+                  id="data"
+                  name="data"
+                  value={formData.data}
+                  onChange={handleChange}
+                  required
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="ora"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Time
+                </label>
+                <input
+                  type="time"
+                  id="ora"
+                  name="ora"
+                  value={formData.ora}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
             <div>
               <label
                 htmlFor="tip_evaluare"
@@ -215,16 +262,12 @@ export default function ScheduleExam() {
                 required
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               >
-                <option value="" disabled>
-                  Select an exam type
-                </option>
+                <option value="">Select an exam type</option>
                 <option value="Final">Final</option>
                 <option value="Partial">Partial</option>
                 <option value="Test">Test</option>
               </select>
             </div>
-
-            {/* Professors */}
             <div>
               <label
                 htmlFor="professors"
@@ -249,7 +292,6 @@ export default function ScheduleExam() {
               </select>
             </div>
 
-            {/* Assistants */}
             <div>
               <label
                 htmlFor="assistants"
@@ -274,46 +316,30 @@ export default function ScheduleExam() {
               </select>
             </div>
 
-            {/* Submit Button */}
-            <div className="text-center">
-              <button
-                type="submit"
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none"
-              >
-                Schedule Exam
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full px-6 py-3 text-lg font-medium text-white rounded-md ${
+                loading
+                  ? "bg-blue-300 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+            >
+              {loading ? "Scheduling..." : "Schedule Exam"}
+            </button>
           </form>
+
+          {showToast && (
+            <div
+              className={`fixed bottom-4 right-4 p-4 rounded-lg text-white ${
+                error ? "bg-red-500" : "bg-green-500"
+              }`}
+            >
+              {toastMessage}
+            </div>
+          )}
         </main>
       </SidebarInset>
-
-      {/* Toast Notification */}
-      {showToast && (
-        <div
-          id="toast-simple"
-          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center w-full max-w-xs p-4 space-x-4 text-gray-500 bg-white divide-x divide-gray-200 rounded-lg shadow dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800"
-          role="alert"
-        >
-          <svg
-            className="w-5 h-5 text-blue-600 dark:text-blue-500 rotate-45"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 18 20"
-          >
-            <path
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="m9 17 8 2L9 1 1 19l8-2Zm0 0V9"
-            />
-          </svg>
-          <div className="ps-4 text-sm font-normal">
-            Exam scheduled successfully! Redirecting...
-          </div>
-        </div>
-      )}
     </SidebarProvider>
   );
 }

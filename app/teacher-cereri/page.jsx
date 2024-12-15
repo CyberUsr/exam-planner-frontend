@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getAllCereri, updateCerere } from "../services/cereriService";
+import { getAllMaterii } from "../services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -42,7 +43,9 @@ export default function TeacherCereriPage() {
   const [error, setError] = useState(null);
   const [comment, setComment] = useState(""); // State for adding comments
   const [selectedCerereId, setSelectedCerereId] = useState(null); // To track selected cerere for comment
+  const [materii, setMaterii] = useState([]); // Store all materii data
 
+  // Fetch all cereri
   const fetchCereri = async () => {
     setLoading(true);
     try {
@@ -54,6 +57,24 @@ export default function TeacherCereriPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch all materii and cache them
+  const fetchMaterii = async () => {
+    try {
+      const data = await getAllMaterii();
+      setMaterii(data);
+    } catch (err) {
+      console.error("Error fetching materii:", err);
+      setError("Failed to load materii.");
+    }
+  };
+
+  // Get materie name by id
+  const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
   };
 
   const handleApprove = async (id) => {
@@ -94,6 +115,7 @@ export default function TeacherCereriPage() {
 
   useEffect(() => {
     fetchCereri();
+    fetchMaterii();
   }, []);
 
   return (
@@ -134,9 +156,7 @@ export default function TeacherCereriPage() {
               <table className="table-auto w-full border">
                 <thead>
                   <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                    <th className="border px-4 py-2">ID</th>
-                    <th className="border px-4 py-2">User ID</th>
-                    <th className="border px-4 py-2">Examen Sala ID</th>
+                    <th className="border px-4 py-2">Materie</th>
                     <th className="border px-4 py-2">Data</th>
                     <th className="border px-4 py-2">Ora</th>
                     <th className="border px-4 py-2">Status</th>
@@ -150,10 +170,8 @@ export default function TeacherCereriPage() {
                       key={cerere.id_cerere}
                       className="even:bg-gray-100 dark:even:bg-gray-700"
                     >
-                      <td className="border px-4 py-2">{cerere.id_cerere}</td>
-                      <td className="border px-4 py-2">{cerere.id_user}</td>
                       <td className="border px-4 py-2">
-                        {cerere.id_examene_sali}
+                        {getMaterieNameById(cerere.id_materie)}
                       </td>
                       <td className="border px-4 py-2">
                         {new Date(cerere.data).toLocaleDateString()}

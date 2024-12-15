@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3003/examene"; // Adjust as per your API URL
+const API_URL = "http://localhost:3003/examene";
 
 // Fetch all exams
 export const getAllExamene = async () => {
@@ -8,11 +8,8 @@ export const getAllExamene = async () => {
     const response = await axios.get(API_URL);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error fetching exams:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch exams.");
+    console.error("Error fetching exams:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to fetch exams.");
   }
 };
 
@@ -22,25 +19,19 @@ export const getExamById = async (id_exam) => {
     const response = await axios.get(`${API_URL}/${id_exam}`);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error fetching exam:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch exam.");
+    console.error("Error fetching exam:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to fetch exam.");
   }
 };
 
 // Create a new exam
-export const createExam = async (data) => {
+export const createExam = async (examData) => {
   try {
-    const response = await axios.post(API_URL, data);
+    const response = await axios.post(API_URL, examData);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error creating exam:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to create exam.");
+    console.error("Error creating exam:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to create exam. Please check all fields and try again.");
   }
 };
 
@@ -50,11 +41,8 @@ export const updateExam = async (id_exam, data) => {
     const response = await axios.put(`${API_URL}/${id_exam}`, data);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error updating exam:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to update exam.");
+    console.error("Error updating exam:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to update exam.");
   }
 };
 
@@ -64,11 +52,8 @@ export const deleteExam = async (id_exam) => {
     const response = await axios.delete(`${API_URL}/${id_exam}`);
     return response.data;
   } catch (error) {
-    console.error(
-      "Error deleting exam:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to delete exam.");
+    console.error("Error deleting exam:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to delete exam.");
   }
 };
 
@@ -78,11 +63,8 @@ export const getAllProfesori = async () => {
     const response = await axios.get("http://localhost:3003/profesori");
     return response.data;
   } catch (error) {
-    console.error(
-      "Error fetching professors:",
-      error.response?.data || error.message
-    );
-    throw new Error("Failed to fetch professors.");
+    console.error("Error fetching professors:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Failed to fetch professors.");
   }
 };
 

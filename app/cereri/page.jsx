@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -29,14 +28,14 @@ export default function StudentCereriPage() {
   const [newCerere, setNewCerere] = useState({
     id_user: "", // Student ID (will be populated dynamically)
     id_materie: "",
-    data: "",
-    ora: "",
+    data: "", // Date input
+    ora: "",  // Time input
   });
   const [error, setError] = useState(null);
 
   const fetchMaterii = async () => {
     try {
-      const data = await getAllMaterii(); // Fetch Materii based on user's group
+      const data = await getAllMaterii();
       setMaterii(data);
     } catch (err) {
       console.error("Error fetching Materii:", err);
@@ -46,12 +45,31 @@ export default function StudentCereriPage() {
   const handleCreateCerere = async (e) => {
     e.preventDefault();
     try {
-      await createCerere(newCerere);
-      setNewCerere({ id_user: "", id_materie: "", data: "", ora: "" });
+      // Combine date and time into a full ISO-8601 datetime
+      const fullDateTime = new Date(`${newCerere.data}T${newCerere.ora}:00Z`);
+      
+      const cerereToSubmit = {
+        id_user: newCerere.id_user, // Ensure this is populated
+        id_materie: newCerere.id_materie,
+        data: fullDateTime.toISOString(), // Convert to ISO-8601 string
+        ora: fullDateTime.toISOString(), // Same full datetime
+      };
+
+      await createCerere(cerereToSubmit);
+      
+      // Reset form after successful submission
+      setNewCerere({
+        id_user: newCerere.id_user,
+        id_materie: "",
+        data: "",
+        ora: "",
+      });
+      
+      setError(null);
       alert("Cerere created successfully!");
     } catch (err) {
       console.error("Error creating cerere:", err);
-      setError("Failed to create cerere.");
+      setError(err.response?.data?.message || "Failed to create cerere");
     }
   };
 
