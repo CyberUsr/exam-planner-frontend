@@ -12,7 +12,7 @@ export const getAllMaterii = async () => {
       "Failed to fetch materii:",
       error.response?.data || error.message
     );
-    throw error;
+    throw new Error(error.response?.data?.message || "Failed to fetch subjects.");
   }
 };
 
@@ -58,30 +58,23 @@ export const updateMaterie = async (id, data) => {
   }
 };
 
-// Find a subject (materie) by ID
+// Find materie by ID method
 export const findMaterieById = async (id_materie) => {
-  console.log("id_materie passed:", id_materie);
-  if (!id_materie || typeof id_materie !== "string") {
-    throw new Error(
-      `Invalid id_materie: ${JSON.stringify(id_materie)}. It must be a string.`
-    );
-  }
-
   try {
-    const response = await axios.get(`${API_BASE_URL}/find-by-id`, {
-      params: { id_materie },
-    });
-
-    if (!response.data) {
-      throw new Error(`Materie with ID "${id_materie}" not found`);
-    }
-
+    console.log('Finding subject with ID:', id_materie);
+    console.log('Full URL:', `${API_BASE_URL}/${id_materie}`);
+    
+    const response = await axios.get(`${API_BASE_URL}/${id_materie}`);
     return response.data;
   } catch (error) {
-    console.error(
-      `Failed to find materie by ID "${id_materie}":`,
-      error.response?.data || error.message
+    console.error('Full error details:', error);
+    console.error('Error response:', error.response);
+    
+    throw new Error(
+      error.response?.data?.message ||
+      `Failed to find subject with ID ${id_materie}. 
+      Status: ${error.response?.status}. 
+      Error: ${error.message}`
     );
-    throw error;
   }
 };

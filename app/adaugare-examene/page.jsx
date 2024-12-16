@@ -46,72 +46,111 @@ export default function ScheduleExam() {
           getAllProfesori(),
           getAllMaterii(),
         ]);
+  
+        // Log full details of subjects
+        console.log('All Subjects:', materiiData);
+        console.log('Subjects Count:', materiiData.length);
+        
         setProfessorsList(professorsData);
         setMaterii(materiiData);
       } catch (err) {
-        setError("Failed to load initial data. Please refresh the page.");
         console.error("Error loading data:", err);
+        setError("Failed to load initial data. Please refresh the page.");
       } finally {
         setLoading(false);
       }
     };
-
+  
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const materiiData = await getAllMaterii();
+        
+        // Log all available subjects
+        console.log('Available subjects:', materiiData);
+        
+        setMaterii(materiiData);
+      } catch (err) {
+        console.error("Error loading subjects:", err);
+        setError("Failed to load subjects. Please refresh the page.");
+      }
+    };
+  
     fetchData();
   }, []);
 
   const validateMaterie = async (id_materie) => {
-    if (!id_materie) {
-      throw new Error("Subject ID is required.");
+    try {
+      // Add console logging
+      console.log(`Validating materie with ID: ${id_materie}`);
+  
+      if (!id_materie) {
+        throw new Error("Subject ID is required.");
+      }
+  
+      const materie = await findMaterieById(id_materie);
+  
+      // Add a more detailed log
+      console.log('Materie validation result:', materie);
+  
+      if (!materie) {
+        throw new Error(`Subject with ID "${id_materie}" does not exist.`);
+      }
+  
+      return materie;
+    } catch (error) {
+      console.error('Materie validation error:', error);
+      // Rethrow the error to be caught in the calling function
+      throw error;
     }
-
-    const materie = await findMaterieById(id_materie);
-    if (!materie) {
-      throw new Error(`Subject with ID "${id_materie}" does not exist.`);
-    }
-
-    return materie;
   };
-
+   // Get materie name by id
+   const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (error) setError("");
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
       const { id_materie, data, ora, tip_evaluare, professors, assistants } = formData;
-
-      // Validate required fields
-      if (!id_materie || !data || !ora || !tip_evaluare || !professors || !assistants) {
-        throw new Error("Please fill in all required fields.");
-      }
-
+  
       // Validate the subject by ID
-      await validateMaterie(id_materie);
-
-      // Prepare ISO date-time string
-      const isoDateTime = `${data}T${ora}:00.000Z`;
-
-      // Create exam payload
-      const payload = {
-        id_materie,
-        data_ora: isoDateTime,
+      const validatedMaterie = await validateMaterie(id_materie);
+  
+      const nume_materie=getMaterieNameById(id_materie);
+      // Construct payload
+      const examData = {
+        nume_materie,
+        data,
+        ora,
         tip_evaluare,
-        professors: [professors],
-        assistants: [assistants],
+        professors,
+        assistants,
       };
-
-      // API Call to create exam
-      await createExam(payload);
-
-      // Success handling
+  
+      // Log the data being sent
+      console.log('Submitting Exam Data:', examData);
+  
+      // Call the createExam service
+      const response = await createExam(examData);
+  
+      // Log and display success message
+      console.log("Exam created successfully:", response);
       setToastMessage("Exam scheduled successfully!");
       setShowToast(true);
+  
+      // Optionally reset form
       setFormData({
         id_materie: "",
         data: "",
@@ -120,21 +159,19 @@ export default function ScheduleExam() {
         professors: "",
         assistants: "",
       });
-
-      // Redirect
-      setTimeout(() => {
-        router.push("/dashboard/professor/manage-exams");
-      }, 2000);
+  
+      // Redirect if necessary
+      router.push("/dashboard/professor/manage-exams");
     } catch (error) {
-      setError(error.message || "Failed to schedule exam. Please try again.");
-      setToastMessage(error.message || "Failed to schedule exam. Please try again.");
-      setShowToast(true);
+      console.error("Error scheduling exam:", error);
+      setError(error.message || "Failed to schedule the exam. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
 
-  if (loading && !professorsList.length && !materii.length) {
+   if (loading && !professorsList.length && !materii.length) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
