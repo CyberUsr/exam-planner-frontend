@@ -10,6 +10,7 @@ import {
 } from "../services/exameneSaliService";
 import { getAllExamene } from "../services/exameneService";
 import { getAllSali } from "../services/saliService";
+import { getAllMaterii } from "../services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -53,6 +54,19 @@ export default function ManageExams() {
     id_examene: "",
     id_sala: "",
   });
+  const [materii, setMaterii] = useState([]); // Store all materii data
+
+
+  // Fetch all materii and cache them
+  const fetchMaterii = async () => {
+    try {
+      const data = await getAllMaterii();
+      setMaterii(data);
+    } catch (err) {
+      console.error("Error fetching materii:", err);
+      setError("Failed to load materii.");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,10 +79,31 @@ export default function ManageExams() {
       setExamene(exameneData);
       setSali(saliData);
     };
+    
 
     fetchData();
+    fetchMaterii();
   }, []);
 
+  const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
+  };
+  const getMaterieNameFromExamen = (idExamen) => {
+    if (!idExamen) return "Loading...";
+    const examen = examene.find((e) => e.id_examene === idExamen);
+    if (!examen) return "Exam Not Found";
+  
+    const materie = materii.find((m) => m.id_materie === examen.id_materie);
+    return materie ? materie.nume_materie : "Materie Not Found";
+  };
+  
+  const getSalaNameById = (idSala) => {
+    if (!idSala) return "Loading...";
+    const sala =sali.find((s) => s.id_sala === idSala);
+    return sala ? sala.nume : "Unknown";
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.id_examene_sali) {
@@ -132,7 +167,7 @@ export default function ManageExams() {
               <option value="">Select Exam</option>
               {examene.map((exam) => (
                 <option key={exam.id_examene} value={exam.id_examene}>
-                  {exam.nume_materie}
+                  {getMaterieNameById(exam.id_materie)}
                 </option>
               ))}
             </select>
@@ -173,8 +208,8 @@ export default function ManageExams() {
                   key={record.id_examene_sali}
                   className="even:bg-gray-50 dark:even:bg-gray-800"
                 >
-                  <td className="p-3">{record.id_examene}</td>
-                  <td className="p-3">{record.id_sala}</td>
+                  <td className="p-3">{getMaterieNameFromExamen(record.id_examene)}</td>
+                  <td className="p-3">{getSalaNameById(record.id_sala)}</td>
                   <td className="p-3">
                     <button
                       onClick={() => setFormData(record)}

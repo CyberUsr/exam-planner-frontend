@@ -9,6 +9,7 @@ import {
 } from "../services/exameneSaliService";
 import { getAllExamene } from "../services/exameneService";
 import { getAllSali } from "../services/saliService";
+import { getAllMaterii } from "../services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -52,6 +53,8 @@ export default function ExameneSaliManager() {
     id_examene: "",
     id_sala: "",
   });
+  const [materii, setMaterii] = useState([]); // Store all materii data
+
 
   const fetchData = async () => {
     try {
@@ -67,14 +70,32 @@ export default function ExameneSaliManager() {
       console.error("Error fetching data:", error);
     }
   };
+  // Fetch all materii and cache them
+  const fetchMaterii = async () => {
+    try {
+      const data = await getAllMaterii();
+      setMaterii(data);
+    } catch (err) {
+      console.error("Error fetching materii:", err);
+      setError("Failed to load materii.");
+    }
+  };
 
   useEffect(() => {
     fetchData();
+    fetchMaterii();
   }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  // Get materie name by id
+  const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
+  }; 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -145,22 +166,7 @@ export default function ExameneSaliManager() {
                 onSubmit={handleSubmit}
                 className="grid sm:grid-cols-2 gap-4"
               >
-                <select
-                  name="id_examene"
-                  value={formData.id_examene}
-                  onChange={handleChange}
-                  required
-                  className="border p-2 rounded"
-                >
-                  <option value="" disabled>
-                    Select Examene
-                  </option>
-                  {examene.map((exam) => (
-                    <option key={exam.id_examene} value={exam.id_examene}>
-                      {exam.nume_materie}
-                    </option>
-                  ))}
-                </select>
+                
                 <select
                   name="id_sala"
                   value={formData.id_sala}

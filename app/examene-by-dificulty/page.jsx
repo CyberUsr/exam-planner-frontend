@@ -4,6 +4,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { getAllExamene } from "../services/exameneService"; // Import the exams fetching function
+import { getAllMaterii } from "../services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -46,6 +47,24 @@ const studentNav = [
 export default function ExameneDificultate() {
   const [exams, setExams] = useState([]);
   const [groupedExams, setGroupedExams] = useState({});
+  const [materii, setMaterii] = useState([]); // Store all materii data
+
+  const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
+  };
+
+   // Fetch all materii and cache them
+   const fetchMaterii = async () => {
+    try {
+      const data = await getAllMaterii();
+      setMaterii(data);
+    } catch (err) {
+      console.error("Error fetching materii:", err);
+      setError("Failed to load materii.");
+    }
+  };
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -70,6 +89,7 @@ export default function ExameneDificultate() {
     };
 
     fetchExams();
+    fetchMaterii();
   }, []);
 
   return (
@@ -123,7 +143,7 @@ export default function ExameneDificultate() {
                           key={exam.id_examene}
                           className="p-2 bg-blue-500 text-white rounded shadow"
                         >
-                          <p className="font-semibold">{exam.nume_materie}</p>
+                          <p className="font-semibold">{getMaterieNameById(exam.id_materie)}</p>
                           <p>
                             Date:{" "}
                             {new Date(exam.data).toLocaleDateString("ro-RO")}
