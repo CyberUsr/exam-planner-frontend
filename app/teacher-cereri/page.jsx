@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter
 import { getAllCereri, updateCerere } from "../services/cereriService";
 import { getAllMaterii } from "../services/materiiService";
 import {
@@ -23,17 +24,14 @@ const teacherNav = [
   {
     title: "Manage Cereri",
     url: "/dashboard/teacher/cereri",
-    icon: null,
   },
   {
     title: "Exam Calendar",
     url: "/dashboard/teacher/exams",
-    icon: null,
   },
   {
-    title: "Statistici",
+    title: "Statistics",
     url: "/dashboard/teacher/statistics",
-    icon: null,
   },
 ];
 
@@ -41,9 +39,8 @@ export default function TeacherCereriPage() {
   const [cereri, setCereri] = useState([]);
   const [, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [comment, setComment] = useState(""); // State for adding comments
-  const [selectedCerereId, setSelectedCerereId] = useState(null); // To track selected cerere for comment
-  const [materii, setMaterii] = useState([]); // Store all materii data
+  const [materii, setMaterii] = useState([]); // Cache for all materii
+  const router = useRouter();
 
   // Fetch all cereri
   const fetchCereri = async () => {
@@ -70,46 +67,18 @@ export default function TeacherCereriPage() {
     }
   };
 
-  // Get materie name by id
-  const getMaterieNameById = (idMaterie) => {
-    if (!idMaterie) return "Loading...";
-    const materie = materii.find((m) => m.id_materie === idMaterie);
-    return materie ? materie.nume_materie : "Unknown";
-  };
-
-  const handleApprove = async (id) => {
+  const handleApprove = async (cerere) => {
     try {
-      await updateCerere(id, { status: "Approved" });
+      await updateCerere(cerere.id_cerere, { status: "Approved" });
       alert("Cerere approved successfully");
-      fetchCereri();
+
+      // Redirect to Schedule Exam with cerere data
+      router.push(
+        `/adaugare-examene?id_cerere=${cerere.id_cerere}&id_materie=${cerere.id_materie}&data=${cerere.data}&ora=${cerere.ora}`
+      );
     } catch (err) {
       console.error("Error approving cerere:", err);
       setError("Failed to approve cerere.");
-    }
-  };
-
-  const handleReject = async (id) => {
-    try {
-      await updateCerere(id, { status: "Rejected" });
-      alert("Cerere rejected successfully");
-      fetchCereri();
-    } catch (err) {
-      console.error("Error rejecting cerere:", err);
-      setError("Failed to reject cerere.");
-    }
-  };
-
-  const handleAddComment = async (e) => {
-    e.preventDefault();
-    try {
-      await updateCerere(selectedCerereId, { comment });
-      alert("Comment added successfully");
-      setComment("");
-      setSelectedCerereId(null);
-      fetchCereri();
-    } catch (err) {
-      console.error("Error adding comment:", err);
-      setError("Failed to add comment.");
     }
   };
 
@@ -125,13 +94,11 @@ export default function TeacherCereriPage() {
         user={{
           name: "Teacher",
           email: "teacher@example.com",
-          avatar: "/avatars/teacher.jpg",
         }}
       />
       <SidebarInset>
-        {/* Header */}
         <header className="flex h-16 shrink-0 items-center gap-2 bg-white dark:bg-gray-800 px-4">
-          <SidebarTrigger className="-ml-1" />
+          <SidebarTrigger />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
@@ -146,10 +113,8 @@ export default function TeacherCereriPage() {
           </Breadcrumb>
         </header>
 
-        {/* Main Content */}
         <main className="p-6 flex-1 bg-gray-100 dark:bg-gray-900">
           <div className="grid gap-6">
-            {/* Table Section */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <h2 className="text-xl font-semibold mb-4">Manage Cereri</h2>
               {error && <p className="text-red-500">{error}</p>}
@@ -160,7 +125,6 @@ export default function TeacherCereriPage() {
                     <th className="border px-4 py-2">Data</th>
                     <th className="border px-4 py-2">Ora</th>
                     <th className="border px-4 py-2">Status</th>
-                    <th className="border px-4 py-2">Comment</th>
                     <th className="border px-4 py-2">Actions</th>
                   </tr>
                 </thead>
@@ -171,7 +135,8 @@ export default function TeacherCereriPage() {
                       className="even:bg-gray-100 dark:even:bg-gray-700"
                     >
                       <td className="border px-4 py-2">
-                        {getMaterieNameById(cerere.id_materie)}
+                        {materii.find((m) => m.id_materie === cerere.id_materie)
+                          ?.nume_materie || "Unknown"}
                       </td>
                       <td className="border px-4 py-2">
                         {new Date(cerere.data).toLocaleDateString()}
@@ -183,26 +148,11 @@ export default function TeacherCereriPage() {
                         {cerere.status || "Pending"}
                       </td>
                       <td className="border px-4 py-2">
-                        {cerere.comment || "No comment"}
-                      </td>
-                      <td className="border px-4 py-2 flex space-x-2">
                         <button
-                          onClick={() => handleApprove(cerere.id_cerere)}
+                          onClick={() => handleApprove(cerere)}
                           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                         >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleReject(cerere.id_cerere)}
-                          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                        >
-                          Reject
-                        </button>
-                        <button
-                          onClick={() => setSelectedCerereId(cerere.id_cerere)}
-                          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        >
-                          Add Comment
+                          Approve & Schedule
                         </button>
                       </td>
                     </tr>
@@ -213,42 +163,6 @@ export default function TeacherCereriPage() {
           </div>
         </main>
       </SidebarInset>
-
-      {/* Comment Modal */}
-      {selectedCerereId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-1/3">
-            <h2 className="text-xl font-bold mb-4">Add Comment</h2>
-            <form onSubmit={handleAddComment}>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Add your comment here..."
-                required
-                className="w-full border p-2 rounded mb-4"
-              ></textarea>
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedCerereId(null);
-                    setComment("");
-                  }}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                >
-                  Add Comment
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </SidebarProvider>
   );
 }

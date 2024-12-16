@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import axios from "axios";
 
 const API_URL = "http://localhost:3003/cereri"; // Base URL for the Cereri API
@@ -27,6 +28,7 @@ export const createCerere = async (data) => {
 
 export const updateCerere = async (id, data) => {
   const response = await axios.put(`${API_URL}/${id}`, data);
+  scheduledForExam: true;
   return response.data;
 };
 

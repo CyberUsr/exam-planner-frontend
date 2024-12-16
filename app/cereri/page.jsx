@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -29,7 +30,7 @@ export default function StudentCereriPage() {
     id_user: "", // Student ID (will be populated dynamically)
     id_materie: "",
     data: "", // Date input
-    ora: "",  // Time input
+    ora: "", // Time input
   });
   const [error, setError] = useState(null);
 
@@ -47,7 +48,7 @@ export default function StudentCereriPage() {
     try {
       // Combine date and time into a full ISO-8601 datetime
       const fullDateTime = new Date(`${newCerere.data}T${newCerere.ora}:00Z`);
-      
+
       const cerereToSubmit = {
         id_user: newCerere.id_user, // Ensure this is populated
         id_materie: newCerere.id_materie,
@@ -56,7 +57,7 @@ export default function StudentCereriPage() {
       };
 
       await createCerere(cerereToSubmit);
-      
+
       // Reset form after successful submission
       setNewCerere({
         id_user: newCerere.id_user,
@@ -64,7 +65,7 @@ export default function StudentCereriPage() {
         data: "",
         ora: "",
       });
-      
+
       setError(null);
       alert("Cerere created successfully!");
     } catch (err) {

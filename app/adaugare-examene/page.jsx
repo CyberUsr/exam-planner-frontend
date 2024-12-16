@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createExam, getAllProfesori } from "../services/exameneService";
-import { getAllMaterii, findMaterieById } from "../services/materiiService";
+import { getAllMaterii } from "../services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -21,6 +22,9 @@ import {
 } from "@/components/ui/breadcrumb";
 
 export default function ScheduleExam() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
     id_materie: "",
     data: "",
@@ -30,14 +34,31 @@ export default function ScheduleExam() {
     assistants: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [numeMaterie, setNumeMaterie] = useState(""); // Store the subject name
   const [professorsList, setProfessorsList] = useState([]);
   const [materii, setMaterii] = useState([]);
-  const [showToast, setShowToast] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [toastMessage, setToastMessage] = useState("");
-  const router = useRouter();
+  const [showToast, setShowToast] = useState(false);
 
+  // Populate formData and numeMaterie from query parameters
+  useEffect(() => {
+    const idMaterie = searchParams.get("id_materie");
+    const data = searchParams.get("data");
+    const ora = searchParams.get("ora");
+
+    if (idMaterie && data && ora) {
+      setFormData((prev) => ({
+        ...prev,
+        id_materie: idMaterie,
+        data: data.split("T")[0], // Extract date from ISO string
+        ora: ora.split("T")[1]?.substring(0, 5), // Extract time from ISO string
+      }));
+    }
+  }, [searchParams]);
+
+  // Fetch professors and subjects
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -46,111 +67,63 @@ export default function ScheduleExam() {
           getAllProfesori(),
           getAllMaterii(),
         ]);
-  
-        // Log full details of subjects
-        console.log('All Subjects:', materiiData);
-        console.log('Subjects Count:', materiiData.length);
-        
+
         setProfessorsList(professorsData);
         setMaterii(materiiData);
+
+        // Set numeMaterie if id_materie is present
+        const idMaterie = searchParams.get("id_materie");
+        if (idMaterie) {
+          const selectedMaterie = materiiData.find(
+            (materie) => materie.id_materie === idMaterie
+          );
+          if (selectedMaterie) {
+            setNumeMaterie(selectedMaterie.nume_materie);
+          }
+        }
       } catch (err) {
-        console.error("Error loading data:", err);
-        setError("Failed to load initial data. Please refresh the page.");
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please refresh the page.");
       } finally {
         setLoading(false);
       }
     };
-  
-    fetchData();
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const materiiData = await getAllMaterii();
-        
-        // Log all available subjects
-        console.log('Available subjects:', materiiData);
-        
-        setMaterii(materiiData);
-      } catch (err) {
-        console.error("Error loading subjects:", err);
-        setError("Failed to load subjects. Please refresh the page.");
-      }
-    };
-  
-    fetchData();
-  }, []);
 
-  const validateMaterie = async (id_materie) => {
-    try {
-      // Add console logging
-      console.log(`Validating materie with ID: ${id_materie}`);
-  
-      if (!id_materie) {
-        throw new Error("Subject ID is required.");
-      }
-  
-      const materie = await findMaterieById(id_materie);
-  
-      // Add a more detailed log
-      console.log('Materie validation result:', materie);
-  
-      if (!materie) {
-        throw new Error(`Subject with ID "${id_materie}" does not exist.`);
-      }
-  
-      return materie;
-    } catch (error) {
-      console.error('Materie validation error:', error);
-      // Rethrow the error to be caught in the calling function
-      throw error;
-    }
-  };
-   // Get materie name by id
-   const getMaterieNameById = (idMaterie) => {
-    if (!idMaterie) return "Loading...";
-    const materie = materii.find((m) => m.id_materie === idMaterie);
-    return materie ? materie.nume_materie : "Unknown";
-  };
+    fetchData();
+  }, [searchParams]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (error) setError("");
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-  
+
     try {
-      const { id_materie, data, ora, tip_evaluare, professors, assistants } = formData;
-  
-      // Validate the subject by ID
-      const validatedMaterie = await validateMaterie(id_materie);
-  
-      const nume_materie=getMaterieNameById(id_materie);
-      // Construct payload
+      const { id_materie, data, ora, tip_evaluare, professors, assistants } =
+        formData;
+
       const examData = {
-        nume_materie,
+        id_materie,
+        nume_materie: numeMaterie, // Include the subject name
         data,
         ora,
         tip_evaluare,
         professors,
         assistants,
       };
-  
-      // Log the data being sent
-      console.log('Submitting Exam Data:', examData);
-  
-      // Call the createExam service
-      const response = await createExam(examData);
-  
-      // Log and display success message
-      console.log("Exam created successfully:", response);
+
+      console.log("Submitting Exam Data:", examData);
+
+      await createExam(examData);
+
       setToastMessage("Exam scheduled successfully!");
       setShowToast(true);
-  
-      // Optionally reset form
+
       setFormData({
         id_materie: "",
         data: "",
@@ -159,25 +132,15 @@ export default function ScheduleExam() {
         professors: "",
         assistants: "",
       });
-  
-      // Redirect if necessary
+
       router.push("/dashboard/professor/manage-exams");
     } catch (error) {
       console.error("Error scheduling exam:", error);
-      setError(error.message || "Failed to schedule the exam. Please try again.");
+      setError("Failed to schedule the exam. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-  
-
-   if (loading && !professorsList.length && !materii.length) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <SidebarProvider>
@@ -189,7 +152,6 @@ export default function ScheduleExam() {
         user={{
           name: "Professor",
           email: "professor@example.com",
-          avatar: "/avatars/professor.jpg",
         }}
       />
       <SidebarInset>
@@ -226,23 +188,16 @@ export default function ScheduleExam() {
                 htmlFor="id_materie"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Select Subject
+                Subject
               </label>
-              <select
+              <input
+                type="text"
                 id="id_materie"
                 name="id_materie"
-                value={formData.id_materie}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              >
-                <option value="">Choose a subject</option>
-                {materii.map((materie) => (
-                  <option key={materie.id_materie} value={materie.id_materie}>
-                    {materie.nume_materie}
-                  </option>
-                ))}
-              </select>
+                value={numeMaterie}
+                readOnly
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -260,8 +215,7 @@ export default function ScheduleExam() {
                   value={formData.data}
                   onChange={handleChange}
                   required
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
                 />
               </div>
 
@@ -279,11 +233,12 @@ export default function ScheduleExam() {
                   value={formData.ora}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
                 />
               </div>
             </div>
 
+            {/* Additional Fields */}
             <div>
               <label
                 htmlFor="tip_evaluare"
@@ -297,7 +252,7 @@ export default function ScheduleExam() {
                 value={formData.tip_evaluare}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
               >
                 <option value="">Select an exam type</option>
                 <option value="Final">Final</option>
@@ -305,6 +260,7 @@ export default function ScheduleExam() {
                 <option value="Test">Test</option>
               </select>
             </div>
+
             <div>
               <label
                 htmlFor="professors"
@@ -318,7 +274,7 @@ export default function ScheduleExam() {
                 value={formData.professors}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
               >
                 <option value="">Choose a professor</option>
                 {professorsList.map((prof) => (
@@ -342,7 +298,7 @@ export default function ScheduleExam() {
                 value={formData.assistants}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
               >
                 <option value="">Choose an assistant</option>
                 {professorsList.map((prof) => (
@@ -360,7 +316,7 @@ export default function ScheduleExam() {
                 loading
                   ? "bg-blue-300 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              }`}
             >
               {loading ? "Scheduling..." : "Schedule Exam"}
             </button>
