@@ -5,69 +5,46 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { getAllProfesori } from "../services/profesoriService";
-import {
-  getAllExamene,
-  exportExamsGroupedByDay,
-} from "../services/exameneService";
+import { getAllMaterii } from "../services/materiiService";
+import { getAllExamene } from "../services/exameneService";
 import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import Papa from "papaparse";
-import { ChevronsUpDown, Check } from "lucide-react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandInput,
-  CommandList,
-  CommandItem,
-  CommandGroup,
-  CommandEmpty,
-} from "@/components/ui/command";
-import { Button } from "@/components/ui/button";
 
-interface Professor {
-  id_profesor: string;
-  nume: string;
-  prenume: string;
+interface Materie {
+  id_materie: string;
+  nume_materie: string;
 }
 
 interface Exam {
   id_examene: string;
-  nume_materie: string;
+  id_materie: string;
   data: string; // ISO string date
   ora: string; // ISO string date
   tip_evaluare: string;
   actualizatDe: string;
 }
 
-interface GroupedExam {
-  subject: string;
-  time: string;
-  professors: string[];
-  assistants: string[];
-  rooms: { roomName: string; building: string }[];
-}
-
 export default function DashboardPage() {
-  const [professors, setProfessors] = useState<Professor[]>([]);
-  const [filteredProfessors, setFilteredProfessors] = useState<Professor[]>([]);
+  const [materii, setMaterii] = useState<Materie[]>([]);
   const [exams, setExams] = useState<Exam[]>([]);
-  const [selectedProfessor, setSelectedProfessor] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedWeek, setSelectedWeek] = useState<string>("Săptămâna 1");
-  const weeks = ["Săptămâna 1", "Săptămâna 2", "Săptămâna 3"];
+
+  const weekdayMap = {
+    luni: 1,
+    marți: 2,
+    miercuri: 3,
+    joi: 4,
+    vineri: 5,
+    sâmbătă: 6,
+  } as const;
 
   useEffect(() => {
-    const fetchProfessors = async () => {
+    const fetchMaterii = async () => {
       try {
-        const data = await getAllProfesori();
-        setProfessors(data);
-        setFilteredProfessors(data);
+        const data = await getAllMaterii();
+        setMaterii(data);
       } catch (error) {
-        console.error("Error fetching professors:", error);
+        console.error("Error fetching materii:", error);
       }
     };
 
@@ -80,18 +57,14 @@ export default function DashboardPage() {
       }
     };
 
-    fetchProfessors();
+    fetchMaterii();
     fetchExams();
   }, []);
 
-  const weekdayMap = {
-    luni: 1,
-    marți: 2,
-    miercuri: 3,
-    joi: 4,
-    vineri: 5,
-    sâmbătă: 6,
-  } as const;
+  const getMaterieNameById = (idMaterie: string): string => {
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown Materie";
+  };
 
   const getExamsForSlot = (
     day: keyof typeof weekdayMap,
@@ -105,64 +78,78 @@ export default function DashboardPage() {
     });
   };
 
-  const handleExportAsPDF = async () => {
-    try {
-      const groupedExams: Record<string, GroupedExam[]> =
-        await exportExamsGroupedByDay();
-      const doc = new jsPDF();
-      doc.setFontSize(12);
-      doc.text("Exams Grouped by Day", 10, 10);
+  const handleExportAsCSV = () => {
+    const rows: { Day: string; Time: string; Subject: string; Date: string }[] =
+      [];
 
-      Object.keys(groupedExams).forEach((date, index) => {
-        doc.text(`Date: ${date}`, 10, 20 + index * 10);
-        groupedExams[date].forEach((exam, examIndex) => {
-          doc.text(
-            `- ${exam.subject} (${
-              exam.time
-            }) - Professors: ${exam.professors.join(", ")}`,
-            10,
-            30 + index * 10 + examIndex * 5
-          );
-        });
+    for (const day in weekdayMap) {
+      Array.from({ length: 11 }, (_, i) => {
+        const timeSlot = `${8 + i}-${10 + i}`;
+        const examsForSlot = getExamsForSlot(
+          day as keyof typeof weekdayMap,
+          timeSlot
+        );
+        if (examsForSlot.length) {
+          examsForSlot.forEach((exam) => {
+            rows.push({
+              Day: day,
+              Time: timeSlot,
+              Subject: getMaterieNameById(exam.id_materie),
+              Date: new Date(exam.data).toLocaleDateString("ro-RO"),
+            });
+          });
+        }
       });
-
-      doc.save("exams_grouped_by_day.pdf");
-    } catch (error) {
-      console.error("Failed to export as PDF:", error);
     }
+
+    const csv = Papa.unparse(rows);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "exams_schedule.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handleExportAsCSV = async () => {
-    try {
-      const groupedExams: Record<string, GroupedExam[]> =
-        await exportExamsGroupedByDay();
-      const rows: Record<string, string>[] = [];
+  const handleExportAsPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Exam Schedule", 14, 20);
 
-      Object.keys(groupedExams).forEach((date) => {
-        groupedExams[date].forEach((exam) => {
-          rows.push({
-            Date: date,
-            Subject: exam.subject,
-            Time: exam.time,
-            Professors: exam.professors.join(", "),
-            Assistants: exam.assistants.join(", "),
-            Rooms: exam.rooms.map((room) => room.roomName).join(", "),
+    const tableData: [string, string, string, string][] = [];
+
+    for (const day in weekdayMap) {
+      Array.from({ length: 11 }, (_, i) => {
+        const timeSlot = `${8 + i}-${10 + i}`;
+        const examsForSlot = getExamsForSlot(
+          day as keyof typeof weekdayMap,
+          timeSlot
+        );
+        if (examsForSlot.length) {
+          examsForSlot.forEach((exam) => {
+            tableData.push([
+              day,
+              timeSlot,
+              getMaterieNameById(exam.id_materie),
+              new Date(exam.data).toLocaleDateString("ro-RO"),
+            ]);
           });
-        });
+        }
       });
-
-      const csv = Papa.unparse(rows);
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "exams_grouped_by_day.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Failed to export as CSV:", error);
     }
+
+    autoTable(doc, {
+      startY: 30,
+      head: [["Day", "Time", "Subject", "Date"]],
+      body: tableData,
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      alternateRowStyles: { fillColor: [241, 241, 241] },
+    });
+
+    doc.save("exams_schedule.pdf");
   };
 
   return (
@@ -231,7 +218,7 @@ export default function DashboardPage() {
                                   href={`/examene/${exam.id_examene}`}
                                   className="block p-2 bg-blue-500 text-white rounded mb-2"
                                 >
-                                  {exam.nume_materie}
+                                  {getMaterieNameById(exam.id_materie)}
                                 </Link>
                               ))}
                             </td>
