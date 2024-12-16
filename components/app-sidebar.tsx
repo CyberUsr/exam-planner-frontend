@@ -152,6 +152,18 @@ const baseData = {
       ],
     },
     {
+      title: "Orar",
+      url: "#",
+      icon: BookOpen,
+      roles: ["Profesor", "Admin", "Secretariat", "Student"],
+      items: [
+        {
+          title: "Orare",
+          url: "/schedules",
+        },
+      ],
+    },
+    {
       title: "Profesori",
       url: "/manage-sali",
       icon: BookOpen,

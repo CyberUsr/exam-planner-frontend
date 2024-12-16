@@ -60,7 +60,7 @@ export default function ExameneleMele() {
   useEffect(() => {
     const fetchGrupe = async () => {
       try {
-        let data = await getAllGrupe();
+        const data = await getAllGrupe();
         setGrupe(data);
       } catch (error) {
         console.error("Failed to fetch Grupe:", error);
@@ -126,16 +126,32 @@ export default function ExameneleMele() {
     doc.text(`Group: ${group}`, 14, 40);
     doc.text(`Year: ${year}`, 14, 50);
 
-    // Table
-    const rows = exams.map((exam) => [
-      exam.nume_materie,
-      new Date(exam.data).toLocaleDateString("ro-RO"),
-      new Date(exam.ora).toLocaleTimeString("ro-RO"),
-    ]);
+    const tableData = [];
+
+    for (const day in weekdayMap) {
+      Array.from({ length: 11 }, (_, i) => {
+        const timeSlot = `${8 + i}-${10 + i}`;
+        const examsForSlot = getExamsForSlot(day, timeSlot);
+        if (examsForSlot.length) {
+          examsForSlot.forEach((exam) => {
+            tableData.push([
+              day,
+              timeSlot,
+              exam.nume_materie,
+              new Date(exam.data).toLocaleDateString("ro-RO"),
+            ]);
+          });
+        }
+      });
+    }
+
     autoTable(doc, {
       startY: 60,
-      head: [["Subject", "Date", "Time"]],
-      body: rows,
+      head: [["Day", "Time", "Subject", "Date"]],
+      body: tableData,
+      styles: { fontSize: 10, cellPadding: 3 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      alternateRowStyles: { fillColor: [241, 241, 241] },
     });
 
     doc.save("exams.pdf");
@@ -152,7 +168,6 @@ export default function ExameneleMele() {
         }}
       />
       <SidebarInset>
-        {/* Header */}
         <header className="flex h-16 shrink-0 items-center gap-2 bg-white dark:bg-gray-800 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -169,7 +184,6 @@ export default function ExameneleMele() {
           </Breadcrumb>
         </header>
 
-        {/* Weekly Calendar */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-6 text-center text-gray-800 dark:text-gray-100">
             Calendar săptămânal
@@ -189,56 +203,54 @@ export default function ExameneleMele() {
             </button>
           </div>
           <div className="overflow-x-auto">
-            <div className="min-w-[800px]">
-              <table className="w-full text-center border-collapse text-sm sm:text-base">
-                <thead>
-                  <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                    <th className="p-3 border border-gray-300 dark:border-gray-600">
-                      Ora
+            <table className="w-full text-center border-collapse text-sm sm:text-base">
+              <thead>
+                <tr className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                  <th className="p-3 border border-gray-300 dark:border-gray-600">
+                    Ora
+                  </th>
+                  {Object.keys(weekdayMap).map((day) => (
+                    <th
+                      key={day}
+                      className="p-3 border border-gray-300 dark:border-gray-600"
+                    >
+                      {day}
                     </th>
-                    {Object.keys(weekdayMap).map((day) => (
-                      <th
-                        key={day}
-                        className="p-3 border border-gray-300 dark:border-gray-600"
-                      >
-                        {day}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: 11 }, (_, i) => {
-                    const timeSlot = `${8 + i}-${10 + i}`;
-                    return (
-                      <tr
-                        key={i}
-                        className="even:bg-gray-100 dark:even:bg-gray-700"
-                      >
-                        <td className="p-3 border border-gray-300 dark:border-gray-600">
-                          {timeSlot}
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 11 }, (_, i) => {
+                  const timeSlot = `${8 + i}-${10 + i}`;
+                  return (
+                    <tr
+                      key={i}
+                      className="even:bg-gray-100 dark:even:bg-gray-700"
+                    >
+                      <td className="p-3 border border-gray-300 dark:border-gray-600">
+                        {timeSlot}
+                      </td>
+                      {Object.keys(weekdayMap).map((day) => (
+                        <td
+                          key={day}
+                          className="p-3 border border-gray-300 dark:border-gray-600"
+                        >
+                          {getExamsForSlot(day, timeSlot).map((exam) => (
+                            <Link
+                              key={exam.id_examene}
+                              href={`/examene/${exam.id_examene}`}
+                              className="block p-2 bg-blue-500 text-white rounded mb-2"
+                            >
+                              {exam.nume_materie}
+                            </Link>
+                          ))}
                         </td>
-                        {Object.keys(weekdayMap).map((day) => (
-                          <td
-                            key={day}
-                            className="p-3 border border-gray-300 dark:border-gray-600"
-                          >
-                            {getExamsForSlot(day, timeSlot).map((exam) => (
-                              <Link
-                                key={exam.id_examene}
-                                href={`/examene/${exam.id_examene}`}
-                                className="block p-2 bg-blue-500 text-white rounded mb-2"
-                              >
-                                {exam.nume_materie}
-                              </Link>
-                            ))}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </SidebarInset>
