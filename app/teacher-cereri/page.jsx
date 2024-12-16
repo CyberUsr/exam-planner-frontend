@@ -37,22 +37,18 @@ const teacherNav = [
 
 export default function TeacherCereriPage() {
   const [cereri, setCereri] = useState([]);
-  const [, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [materii, setMaterii] = useState([]); // Cache for all materii
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   // Fetch all cereri
   const fetchCereri = async () => {
-    setLoading(true);
     try {
       const data = await getAllCereri();
       setCereri(data);
     } catch (err) {
       console.error("Error fetching cereri:", err);
       setError("Failed to load cereri.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -67,6 +63,7 @@ export default function TeacherCereriPage() {
     }
   };
 
+  // Handle approve action
   const handleApprove = async (cerere) => {
     try {
       await updateCerere(cerere.id_cerere, { status: "Approved" });
@@ -79,6 +76,33 @@ export default function TeacherCereriPage() {
     } catch (err) {
       console.error("Error approving cerere:", err);
       setError("Failed to approve cerere.");
+    }
+  };
+
+  // Handle reject action
+  const handleReject = async (cerere) => {
+    try {
+      await updateCerere(cerere.id_cerere, { status: "Rejected" });
+      alert("Cerere rejected successfully");
+      fetchCereri(); // Refresh the list
+    } catch (err) {
+      console.error("Error rejecting cerere:", err);
+      setError("Failed to reject cerere.");
+    }
+  };
+
+  // Handle comment action
+  const handleComment = async (cerere) => {
+    try {
+      const comment = prompt("Enter your comment:");
+      if (comment) {
+        await updateCerere(cerere.id_cerere, { comment });
+        alert("Comment added successfully");
+        fetchCereri(); // Refresh the list
+      }
+    } catch (err) {
+      console.error("Error adding comment:", err);
+      setError("Failed to add comment.");
     }
   };
 
@@ -147,12 +171,24 @@ export default function TeacherCereriPage() {
                       <td className="border px-4 py-2">
                         {cerere.status || "Pending"}
                       </td>
-                      <td className="border px-4 py-2">
+                      <td className="border px-4 py-2 flex gap-2">
                         <button
                           onClick={() => handleApprove(cerere)}
                           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                         >
                           Approve & Schedule
+                        </button>
+                        <button
+                          onClick={() => handleReject(cerere)}
+                          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                        >
+                          Reject
+                        </button>
+                        <button
+                          onClick={() => handleComment(cerere)}
+                          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        >
+                          Comment
                         </button>
                       </td>
                     </tr>

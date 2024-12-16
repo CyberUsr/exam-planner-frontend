@@ -119,7 +119,7 @@ const baseData = {
         {
           title: "Adauga Examene",
           url: "/adaugare-examene",
-          roles: ["Profesor", "Secretariat"],
+          roles: ["Secretariat"],
         },
         {
           title: "Chestionar",
