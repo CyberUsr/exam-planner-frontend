@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { getAllMaterii } from "../../services/materiiService";
 import {
   getExamById,
   updateExam,
@@ -60,6 +61,17 @@ export default function UpdateExam({ params }) {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [materii, setMaterii] = useState([]);
+
+  
+   const fetchMaterii = async () => {
+      try {
+        const data = await getAllMaterii();
+        setMaterii(data);
+      } catch (err) {
+        console.error("Error fetching Materii:", err);
+      }
+    };
 
   // Fetch professors and exam details
   useEffect(() => {
@@ -72,7 +84,11 @@ export default function UpdateExam({ params }) {
         // Fetch exam details
         if (id) {
           const examData = await getExamById(id);
-
+          
+          // Find the materie name using id_materie
+        const materieName = materii.find(
+          (materie) => materie.id_materie === examData.id_materie
+        )?.nume_materie || "";
           // Safely extract first professor and assistant
           const firstProfessor =
             examData.professors && examData.professors.length > 0
@@ -92,7 +108,7 @@ export default function UpdateExam({ params }) {
             .slice(0, 5);
 
           setFormData({
-            nume_materie: examData.nume_materie || "",
+            nume_materie: materieName,
             data: formattedDate,
             ora: formattedTime,
             tip_evaluare: examData.tip_evaluare || "",
@@ -111,7 +127,10 @@ export default function UpdateExam({ params }) {
     };
 
     fetchData();
+    fetchMaterii();
   }, [id]);
+
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -208,25 +227,6 @@ export default function UpdateExam({ params }) {
             Update Exam
           </h1>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Subject */}
-            <div>
-              <label
-                htmlFor="nume_materie"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Subject
-              </label>
-              <input
-                type="text"
-                id="nume_materie"
-                name="nume_materie"
-                value={formData.nume_materie}
-                onChange={handleChange}
-                required
-                placeholder="Enter the subject"
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
 
             {/* Date */}
             <div>

@@ -117,11 +117,6 @@ const baseData = {
           url: "/statistici",
         },
         {
-          title: "Adauga Examene",
-          url: "/adaugare-examene",
-          roles: ["Profesor", "Secretariat"],
-        },
-        {
           title: "Chestionar",
           url: "/chestionar",
           roles: ["Profesor", "Studenti"],

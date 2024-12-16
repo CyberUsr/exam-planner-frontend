@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { getAllGrupe } from "../services/grupeService";
 import { getAllExamene } from "../services/exameneService";
+import { getAllMaterii } from "../services/materiiService";
 import Link from "next/link";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -47,6 +48,7 @@ export default function ExameneleMele() {
   const [specialization, setSpecialization] = useState("Specialization");
   const [group, setGroup] = useState("Group");
   const [year, setYear] = useState("Year");
+  const [materii, setMaterii] = useState([]);
 
   const weekdayMap = {
     luni: 1,
@@ -56,6 +58,15 @@ export default function ExameneleMele() {
     vineri: 5,
     sâmbătă: 6,
   };
+  const fetchMaterii = async () => {
+    try {
+      const data = await getAllMaterii();
+      setMaterii(data);
+    } catch (err) {
+      console.error("Error fetching Materii:", err);
+    }
+  };
+
 
   useEffect(() => {
     const fetchGrupe = async () => {
@@ -78,6 +89,7 @@ export default function ExameneleMele() {
 
     fetchGrupe();
     fetchExams();
+    fetchMaterii();
   }, []);
 
   const getExamsForSlot = (day, timeSlot) => {
@@ -88,6 +100,12 @@ export default function ExameneleMele() {
 
       return examDay === weekdayMap[day] && examTime === timeSlot;
     });
+  };
+  // Get materie name by id
+  const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
   };
 
   const exportToCSV = () => {
@@ -128,7 +146,7 @@ export default function ExameneleMele() {
 
     // Table
     const rows = exams.map((exam) => [
-      exam.nume_materie,
+      getMaterieNameById(exam.id_materie),
       new Date(exam.data).toLocaleDateString("ro-RO"),
       new Date(exam.ora).toLocaleTimeString("ro-RO"),
     ]);
@@ -228,7 +246,7 @@ export default function ExameneleMele() {
                                 href={`/examene/${exam.id_examene}`}
                                 className="block p-2 bg-blue-500 text-white rounded mb-2"
                               >
-                                {exam.nume_materie}
+                                {getMaterieNameById(exam.id_materie)}
                               </Link>
                             ))}
                           </td>
