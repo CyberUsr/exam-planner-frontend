@@ -14,50 +14,36 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerUser } from "../services/loginService"; // Ensure this service exists and is properly implemented
+import { registerUser } from "../services/loginService";
 
 export default function RegisterForm() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [successMessage, setSuccessMessage] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>(""); // State for email
+  const [password, setPassword] = useState<string>(""); // State for password
+  const [errorMessage, setErrorMessage] = useState<string>(""); // Error message
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
-    setSuccessMessage("");
     setIsLoading(true);
 
-    // Basic validation
-    if (!email || !password) {
-      setErrorMessage("Please fill in all fields");
-      setIsLoading(false);
-      return;
-    }
-
-    // Optional: Add password strength validation
-    if (password.length < 6) {
-      setErrorMessage("Password must be at least 6 characters long");
-      setIsLoading(false);
-      return;
-    }
-
     try {
+      // Call the registration API
       const response = await registerUser(email, password);
 
-      setSuccessMessage(`${response.message}. Redirecting to login...`);
+      const { role } = response.user;
 
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
+      if (role === "Student") {
+        // Redirect to adaugare-studenti page with email
+        router.push(`/adaugare-studenti?email=${encodeURIComponent(email)}`);
+      } else {
+        // Redirect to login page for other roles
         router.push("/login");
-      }, 2000);
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
-      setErrorMessage(
-        error.response?.data?.message || error.message || "Registration failed"
-      );
+      setErrorMessage("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -68,23 +54,26 @@ export default function RegisterForm() {
       <CardHeader>
         <CardTitle className="text-2xl">Sign Up</CardTitle>
         <CardDescription>
-          Enter your information to create an account
+          Enter your email and password to create an account.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-2">
+          {/* Email Input */}
+          <div>
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="m@example.com"
+              placeholder="example@domain.com"
               required
             />
           </div>
-          <div className="grid gap-2">
+
+          {/* Password Input */}
+          <div>
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
@@ -95,25 +84,26 @@ export default function RegisterForm() {
               required
             />
           </div>
+
+          {/* Error Message */}
           {errorMessage && (
-            <p className="text-red-600 text-sm text-center">{errorMessage}</p>
+            <p className="text-red-600 text-center text-sm">{errorMessage}</p>
           )}
-          {successMessage && (
-            <p className="text-green-600 text-sm text-center">
-              {successMessage}
-            </p>
-          )}
-          <Button type="submit" className="w-full">
-            {isLoading ? "Creating Account..." : "Create an account"}
-          </Button>
-          <Button variant="outline" className="w-full">
-            Sign up with GitHub
+
+          {/* Submit Button */}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Registering..." : "Sign Up"}
           </Button>
         </form>
+
+        {/* Redirect to Login */}
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="underline">
-            Sign in
+          <Link
+            href="/login"
+            className="underline text-blue-600 hover:text-blue-800"
+          >
+            Login
           </Link>
         </div>
       </CardContent>
