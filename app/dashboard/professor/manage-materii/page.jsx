@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,8 +7,8 @@ import {
   createMaterie,
   deleteMaterie,
   updateMaterie,
-} from "../services/materiiService";
-import { getAllGrupe } from "../services/grupeService";
+} from "../../../api/services/materiiService";
+import { getAllGrupe } from "../../../api/services/grupeService";
 import {
   SidebarProvider,
   SidebarInset,

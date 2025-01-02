@@ -67,28 +67,28 @@ const baseData = {
       items: [
         {
           title: "Examenele Mele",
-          url: "/examenele-mele",
+          url: "/dashboard/student/examenele-mele",
         },
         {
           title: "Examenele by Dificultate",
-          url: "/examene-by-dificulty",
+          url: "/dashboard/student/examene-by-dificulty",
         },
         {
           title: "Examenene All",
-          url: "/examene-all",
+          url: "/dashboard/secretariat/examene-all",
         },
         {
           title: "Cereri",
-          url: "/cereri",
+          url: "/dashboard/student/cereri",
         },
         {
           title: "Adaugare Studenti",
-          url: "/adaugare-studenti",
+          url: "/dashboard/secretariat/adaugare-studenti",
           roles: ["Secretariat"],
         },
         {
           title: "Vizualizare Studenti",
-          url: "/view-studenti",
+          url: "/dashboard/secretariat/view-studenti",
           roles: ["Secretariat"],
         },
       ],
@@ -102,7 +102,7 @@ const baseData = {
       items: [
         {
           title: "Chestionar Examene",
-          url: "/chestionar",
+          url: "/dashboard/student/chestionar",
         },
       ],
     },
@@ -118,7 +118,7 @@ const baseData = {
         },
         {
           title: "Adauga Examene",
-          url: "/adaugare-examene",
+          url: "/dashboard/professor/adaugare-examene",
           roles: ["Secretariat"],
         },
         {
@@ -128,7 +128,7 @@ const baseData = {
         },
         {
           title: "Cereri Profesor",
-          url: "/teacher-cereri",
+          url: "/dashboard/professor/teacher-cereri",
           roles: ["Profesor"],
         },
         {
@@ -147,7 +147,7 @@ const baseData = {
       items: [
         {
           title: "Manage Materii",
-          url: "/manage-materii",
+          url: "/dashboard/professor/manage-materii",
         },
       ],
     },
@@ -171,11 +171,11 @@ const baseData = {
       items: [
         {
           title: "Adauga Profesori",
-          url: "/adaugare-profesori",
+          url: "/dashboard/secretariat/adaugare-profesori",
         },
         {
           title: "Vizualizare Profesori",
-          url: "/view-profesori",
+          url: "/dashboard/secretariat/view-profesori",
         },
       ],
     },
@@ -187,11 +187,11 @@ const baseData = {
       items: [
         {
           title: "Sali Examene",
-          url: "/manage-examen-sali",
+          url: "/dashboard/secretariat/manage-examen-sali",
         },
         {
           title: "Sali",
-          url: "/manage-sali",
+          url: "/dashboard/secretariat/manage-sali",
         },
       ],
     },

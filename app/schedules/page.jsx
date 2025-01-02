@@ -6,7 +6,7 @@ import {
   getAllSchedules,
   getSchedulesForGroup,
   getSchedulesForTeacher,
-} from "../services/scheduleService";
+} from "../api/services/scheduleService";
 import {
   SidebarProvider,
   SidebarInset,

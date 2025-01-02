@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useState } from "react";
-import { getSaliByBuilding } from "../services/saliService";
+import { getSaliByBuilding } from "../api/services/saliService";
 
 export default function CampusMap() {
   const [hoveredBuilding, setHoveredBuilding] = useState(null);

@@ -7,7 +7,7 @@ import {
   createSala,
   updateSala,
   deleteSala,
-} from "../services/saliService";
+} from "../../../api/services/saliService";
 import {
   SidebarProvider,
   SidebarInset,

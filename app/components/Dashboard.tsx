@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { getAllMaterii } from "../services/materiiService";
-import { getAllExamene } from "../services/exameneService";
+import { getAllMaterii } from "../api/services/materiiService";
+import { getAllExamene } from "../api/services/exameneService";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import Papa from "papaparse";
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                               ).map((exam) => (
                                 <Link
                                   key={exam.id_examene}
-                                  href={`/examene/${exam.id_examene}`}
+                                  href={`/dashboard/professor/examene/${exam.id_examene}`}
                                   className="block p-2 bg-blue-500 text-white rounded mb-2"
                                 >
                                   {getMaterieNameById(exam.id_materie)}

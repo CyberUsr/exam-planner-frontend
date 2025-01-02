@@ -2,8 +2,8 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
-import { getAllGrupe } from "../services/grupeService";
-import { getAllExamene } from "../services/exameneService";
+import { getAllGrupe } from "../../../api/services/grupeService";
+import { getAllExamene } from "../../../api/services/exameneService";
 import Link from "next/link";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";

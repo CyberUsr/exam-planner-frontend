@@ -19,7 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import { getAllDepartamente } from "../app/services/departamenteService";
+import { getAllDepartamente } from "../app/api/services/departamenteService";
 
 // Add the logo URL
 const UNIVERSITATEA_LOGO_URL = "http://localhost:3000/logo.svg";

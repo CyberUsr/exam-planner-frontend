@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createExam, getAllProfesori } from "../services/exameneService";
-import { getAllMaterii } from "../services/materiiService";
+import { createExam, getAllProfesori } from "../../../api/services/exameneService";
+import { getAllMaterii } from "../../../api/services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,

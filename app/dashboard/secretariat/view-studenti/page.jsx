@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getAllStudenti } from "../services/studentiService";
+import { getAllStudenti } from "../../../api/services/studentiService";
 import {
   SidebarProvider,
   SidebarInset,

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
-import { getAllCereri, updateCerere } from "../services/cereriService";
-import { getAllMaterii } from "../services/materiiService";
+import { getAllCereri, updateCerere } from "../../../api/services/cereriService";
+import { getAllMaterii } from "../../../api/services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -71,7 +71,7 @@ export default function TeacherCereriPage() {
 
       // Redirect to Schedule Exam with cerere data
       router.push(
-        `/adaugare-examene?id_cerere=${cerere.id_cerere}&id_materie=${cerere.id_materie}&data=${cerere.data}&ora=${cerere.ora}`
+        `/dashboard/professor/adaugare-examene?id_cerere=${cerere.id_cerere}&id_materie=${cerere.id_materie}&data=${cerere.data}&ora=${cerere.ora}`
       );
     } catch (err) {
       console.error("Error approving cerere:", err);

@@ -3,8 +3,8 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { getAllExamene } from "../services/exameneService"; // Import the exams fetching function
-import { getAllMaterii } from "../services/materiiService";
+import { getAllExamene } from "../../../api/services/exameneService"; // Import the exams fetching function
+import { getAllMaterii } from "../../../api/services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { createStudent } from "../services/studentiService";
-import { getAllGrupe } from "../services/grupeService";
+import { createStudent } from "../../../api/services/studentiService";
+import { getAllGrupe } from "../../../api/services/grupeService";
 
 export default function AddStudent() {
   const searchParams = useSearchParams();

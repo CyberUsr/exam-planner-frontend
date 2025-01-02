@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProfesor } from "../services/profesoriService";
+import { createProfesor } from "../../../api/services/profesoriService";
 import {
   SidebarProvider,
   SidebarInset,
@@ -23,12 +23,12 @@ import {
 const secretariatNav = [
   {
     title: "Manage Teachers",
-    url: "/dashboard/secretariat/manage-teachers",
+    url: "/dashboard/secretariat/view-profesori",
     icon: null,
   },
   {
     title: "Add Teacher",
-    url: "/dashboard/secretariat/add-teacher",
+    url: "/dashboard/secretariat/adaugare-profesori",
     icon: null,
   },
 ];

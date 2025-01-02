@@ -7,10 +7,10 @@ import {
   createExameneSali,
   updateExameneSali,
   deleteExameneSali,
-} from "../services/exameneSaliService";
-import { getAllExamene } from "../services/exameneService";
-import { getAllSali } from "../services/saliService";
-import { getAllMaterii } from "../services/materiiService";
+} from "../api/services/exameneSaliService";
+import { getAllExamene } from "../api/services/exameneService";
+import { getAllSali } from "../api/services/saliService";
+import { getAllMaterii } from "../api/services/materiiService";
 import {
   SidebarProvider,
   SidebarInset,

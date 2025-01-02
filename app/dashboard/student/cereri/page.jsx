@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllCereri, createCerere } from "../services/cereriService";
-import { getAllMaterii } from "../services/materiiService";
+import { getAllCereri, createCerere } from "../../../api/services/cereriService";
+import { getAllMaterii } from "../../../api/services//materiiService";
 import {
   SidebarProvider,
   SidebarInset,
