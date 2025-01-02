@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerUser } from "../services/loginService"; // Ensure this service exists and is properly implemented
+import { registerUser } from "../api/services/loginService"; // Ensure this service exists and is properly implemented
 
 export default function RegisterForm() {
   const [email, setEmail] = useState<string>("");

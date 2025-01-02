@@ -3,8 +3,8 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { filterExams } from "../services/exameneService"; // Import the filterExams function
-import { getAllGrupe } from "../services/grupeService"; // Import grupe fetching function
+import { filterExams } from "../../../api/services/exameneService"; // Import the filterExams function
+import { getAllGrupe } from "../../../api/services/grupeService"; // Import grupe fetching function
 import {
   SidebarProvider,
   SidebarInset,

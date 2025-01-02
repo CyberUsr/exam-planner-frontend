@@ -6,8 +6,8 @@ import {
   getAllCereri,
   deleteCerere,
   createCerere,
-} from "../services/cereriService";
-import { getAllExameneSali } from "../services/exameneSaliService";
+} from "../api/services/cereriService";
+import { getAllExameneSali } from "../api/services/exameneSaliService";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { getAllProfesori } from "../services/profesoriService";
+import { getAllProfesori } from "../api/services/profesoriService";
 import {
   getAllExamene,
   exportExamsGroupedByDay,
-} from "../services/exameneService";
+} from "../api/services/exameneService";
 import { jsPDF } from "jspdf";
 import Papa from "papaparse";
 import { ChevronsUpDown, Check } from "lucide-react";

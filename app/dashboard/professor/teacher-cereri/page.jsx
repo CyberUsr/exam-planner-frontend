@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllCereri, updateCerere } from "../services/cereriService";
+import { getAllCereri, updateCerere } from "../../../api/services/cereriService";
 import {
   SidebarProvider,
   SidebarInset,

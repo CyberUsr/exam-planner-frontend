@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProfesor } from "../services/profesoriService";
+import { createProfesor } from "../../../api/services/profesoriService";
 import {
   SidebarProvider,
   SidebarInset,

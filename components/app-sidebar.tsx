@@ -67,7 +67,7 @@ const baseData = {
       items: [
         {
           title: "Examenele Mele",
-          url: "/examenele-mele",
+          url: "/dashboard/student/examenele-mele",
         },
         {
           title: "Cereri",
@@ -75,12 +75,13 @@ const baseData = {
         },
         {
           title: "Adaugare Studenti",
-          url: "/adaugare-studenti",
+          
+          url: "/dashboard/secretariat/adaugare-studenti",
           roles: ["Secretariat"],
         },
         {
           title: "Vizualizare Studenti",
-          url: "/view-studenti",
+          url: "/dashboard/secretariat/view-studenti",
           roles: ["Secretariat"],
         },
       ],
@@ -110,7 +111,7 @@ const baseData = {
         },
         {
           title: "Adauga Examene",
-          url: "/adaugare-examene",
+          url: "/dashboard/professor/adaugare-examene",
           roles: ["Profesor", "Secretariat"],
         },
         {
@@ -120,7 +121,7 @@ const baseData = {
         },
         {
           title: "Cereri Profesor",
-          url: "/teacher-cereri",
+          url: "/dashboard/professor/teacher-cereri",
           roles: ["Profesor"],
         },
         {
@@ -138,11 +139,11 @@ const baseData = {
       items: [
         {
           title: "Adauga Profesori",
-          url: "/adaugare-profesori",
+          url: "/dashboard/secretariat/adaugare-profesori",
         },
         {
           title: "Vizualizare Profesori",
-          url: "/view-profesori",
+          url: "/dashboard/secretariat/view-profesori",
         },
       ],
     },
