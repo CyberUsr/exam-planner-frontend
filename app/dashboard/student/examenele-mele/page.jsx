@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { getAllGrupe } from "../../../api/services/grupeService";
 import { getAllExamene } from "../../../api/services/exameneService";
+import { getAllMaterii } from "../../../api/services/materiiService";
 import Link from "next/link";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -47,6 +48,7 @@ export default function ExameneleMele() {
   const [specialization, setSpecialization] = useState("Specialization");
   const [group, setGroup] = useState("Group");
   const [year, setYear] = useState("Year");
+  const [materii, setMaterii] = useState([]);
 
   const weekdayMap = {
     luni: 1,
@@ -75,7 +77,15 @@ export default function ExameneleMele() {
         console.error("Failed to fetch exams:", error);
       }
     };
-
+    const fetchMaterii = async () => {
+      try {
+        const data = await getAllMaterii();
+        setMaterii(data);
+      } catch (err) {
+        console.error("Error fetching Materii:", err);
+      }
+    };
+    fetchMaterii();
     fetchGrupe();
     fetchExams();
   }, []);
@@ -89,10 +99,16 @@ export default function ExameneleMele() {
       return examDay === weekdayMap[day] && examTime === timeSlot;
     });
   };
+   // Get materie name by id
+   const getMaterieNameById = (idMaterie) => {
+    if (!idMaterie) return "Loading...";
+    const materie = materii.find((m) => m.id_materie === idMaterie);
+    return materie ? materie.nume_materie : "Unknown";
+  };
 
   const exportToCSV = () => {
     const rows = exams.map((exam) => ({
-      Subject: exam.nume_materie,
+      Subject:getMaterieNameById(exam.id_materie),
       Date: new Date(exam.data).toLocaleDateString("ro-RO"),
       Time: new Date(exam.ora).toLocaleTimeString("ro-RO"),
       Specialization: specialization,
@@ -137,7 +153,7 @@ export default function ExameneleMele() {
             tableData.push([
               day,
               timeSlot,
-              exam.nume_materie,
+              getMaterieNameById(exam.id_materie),
               new Date(exam.data).toLocaleDateString("ro-RO"),
             ]);
           });
@@ -241,7 +257,7 @@ export default function ExameneleMele() {
                               href={`/examene/${exam.id_examene}`}
                               className="block p-2 bg-blue-500 text-white rounded mb-2"
                             >
-                              {exam.nume_materie}
+                              {getMaterieNameById(exam.id_materie)}
                             </Link>
                           ))}
                         </td>

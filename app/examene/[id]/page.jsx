@@ -7,7 +7,7 @@ import {
   updateExam,
   deleteExam,
   getAllProfesori,
-} from "../../services/exameneService";
+} from "../../api/services/exameneService";
 import {
   SidebarProvider,
   SidebarInset,
