@@ -179,6 +179,18 @@ const baseData = {
       ],
     },
     {
+      title: "Secretariat",
+      url: "#",
+      icon: BookOpen,
+      roles: ["Admin"],
+      items: [
+        {
+          title: "Adauga Secretar",
+          url: "/adauga-secretar",
+        },
+      ],
+    },
+    {
       title: "Settings",
       url: "#",
       icon: Settings2,
