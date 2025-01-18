@@ -28,22 +28,40 @@ export default function RegisterForm() {
     setErrorMessage("");
     setIsLoading(true);
 
+    if (!email || !password) {
+      setErrorMessage("Please fill in all fields.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Call the registration API
       const response = await registerUser(email, password);
 
-      const { role } = response.user;
+      if (response && response.user && response.user.role) {
+        const { role } = response.user;
 
-      if (role === "Student") {
-        // Redirect to adaugare-studenti page with email
-        router.push(`/adaugare-studenti?email=${encodeURIComponent(email)}`);
+        if (role === "Student") {
+          // Redirect to adaugare-studenti with email
+          router.push(`/adaugare-studenti?email=${encodeURIComponent(email)}`);
+        } else {
+          // Redirect to login for other roles
+          router.push("/login");
+        }
       } else {
-        // Redirect to login page for other roles
-        router.push("/login");
+        throw new Error("Unexpected response format.");
       }
     } catch (error: any) {
       console.error("Registration error:", error);
-      setErrorMessage("Registration failed. Please try again.");
+      setErrorMessage(
+        error.response?.data?.message || error.message || "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
